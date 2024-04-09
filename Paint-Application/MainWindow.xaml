@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:Paint_Application"
         mc:Ignorable="d"
         Title="Pain"
@@ -12,10 +13,158 @@
         >
 
     <!-- ==================== Define Window Resources ==================== -->
+    <Window.Resources>
+        <!-- Style for Toolbar buttons -->
+        <Style x:Key="ToobarButton_Style" TargetType="Button">
+            <Setter Property="Padding" Value="8, 4" />
+        </Style>
+
+        <!-- Style for Toolbar divider -->
+        <Style x:Key="ToolbarDivider_Style" TargetType="StackPanel">
+            <Setter Property="Width" Value="1" />
+            <Setter Property="Background" Value="LightGray" />
+        </Style>
 
 
+        <!-- Style for FunctionalBar Section Border -->
+        <Style x:Key="FunctionalBarSectionBorder_Style" TargetType="Border">
+            <Setter Property="BorderBrush" Value="LightGray" />
+            <Setter Property="BorderThickness" Value="0, 0, 1, 0" />
+            <Setter Property="Margin" Value="0, 4" />
+        </Style>
+        <!-- Style for FunctionalBar Section -->
+        <Style x:Key="FunctionalBarSection_Style" TargetType="StackPanel">
+            <Setter Property="Orientation" Value="Vertical" />
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="Margin" Value="12, 16, 12, 8" />
+        </Style>
+        <!-- Style for FunctionalBar Section Title -->
+        <Style x:Key="FunctionalBarSectionTitle_Style" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextAlignment" Value="Center" />
+        </Style>
+        <!-- Style for FunctionalBar Button Image -->
+        <Style x:Key="FunctionalBarButtonImage_Style" TargetType="Button">
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Margin" Value="4, 0, 4, 8" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+
+    </Window.Resources>
+
+    
     <!-- ==================== WINDOW CONTENT ==================== -->
-    <Grid>
+    <DockPanel LastChildFill="True">
+        <!-- ====== App ToolBar ====== -->
+        <ToolBar DockPanel.Dock="Top">
+            <Button Click="OpenButton_Click" ToolTip="Open file" Style="{StaticResource ToobarButton_Style}">Open</Button>
+            <Button Click="SaveButton_Click" ToolTip="Save file" Style="{StaticResource ToobarButton_Style}">Save</Button>
 
-    </Grid>
+            <StackPanel Style="{StaticResource ToolbarDivider_Style}"/>
+
+            <Button Click="UndoButton_Click" ToolTip="Undo file" Style="{StaticResource ToobarButton_Style}">Undo</Button>
+            <Button Click="RedoButton_Click" ToolTip="Redo file" Style="{StaticResource ToobarButton_Style}">Redo</Button>
+
+            <StackPanel Style="{StaticResource ToolbarDivider_Style}"/>
+
+            <Button Click="ExitButton_Click" ToolTip="Exit file" Style="{StaticResource ToobarButton_Style}">Exit</Button>
+        </ToolBar>
+        
+        
+        <!-- ====== Functional Bar ====== -->
+        <Grid DockPanel.Dock="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                    <!-- Select Button -->
+                    <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                        <Image Source="Assets/select.png"/>
+                    </Button>
+                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Selection</TextBlock>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                    <StackPanel Orientation="Horizontal">
+                        <!-- Draw Line Button -->
+                        <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                            <Image Source="Assets/line.png"/>
+                        </Button>
+                        <!-- Draw Rectangle Button -->
+                        <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                            <Image Source="Assets/rectangle.png"/>
+                        </Button>
+                        <!-- Draw Ellipse Button -->
+                        <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                            <Image Source="Assets/ellipse.png"/>
+                        </Button>
+                        <!-- Draw Triangle Button -->
+                        <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                            <Image Source="Assets/triangle.png"/>
+                        </Button>
+                    </StackPanel>
+
+                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Shapes</TextBlock>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="2" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                    <!-- Color Picker -->
+                    <xctk:ColorPicker Width="32" Height="32" Margin="0, 0, 0, 8"></xctk:ColorPicker>
+
+                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Color</TextBlock>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="3" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                    <!-- Size Button -->
+                    <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                        <Image Source="Assets/thick.png"/>
+                    </Button>
+                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Size</TextBlock>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="4" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                    <!-- Stroke Style Button -->
+                    <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                        <Image Source="Assets/stroke.png"/>
+                    </Button>
+                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke</TextBlock>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Column="5" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
+                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                    <!-- Layers Button -->
+                    <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                        <Image Source="Assets/layer.png"/>
+                    </Button>
+                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Layers</TextBlock>
+                </StackPanel>
+            </Border>
+
+        </Grid>
+
+
+        <!-- ====== Main Canvas ====== -->
+        <Canvas Name="Main_Canvas" Background="White" />
+
+
+
+    </DockPanel>
 </Window>
