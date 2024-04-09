@@ -9,7 +9,7 @@
         Title="Pain"
         Height="450" Width="800"
         WindowStartupLocation="CenterScreen"
-        Icon="Assets/logo.ico"
+        Loaded="Window_Loaded"
         >
 
     <!-- ==================== Define Window Resources ==================== -->
@@ -87,7 +87,7 @@
             <Border Grid.Column="0" Style="{StaticResource FunctionalBarSectionBorder_Style}">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
                     <!-- Select Button -->
-                    <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                    <Button Click="SelectButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
                         <Image Source="Assets/select.png"/>
                     </Button>
                     <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Selection</TextBlock>
@@ -98,19 +98,19 @@
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
                     <StackPanel Orientation="Horizontal">
                         <!-- Draw Line Button -->
-                        <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                        <Button Click="DrawLineButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
                             <Image Source="Assets/line.png"/>
                         </Button>
                         <!-- Draw Rectangle Button -->
-                        <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                        <Button Click="DrawRectangleButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
                             <Image Source="Assets/rectangle.png"/>
                         </Button>
                         <!-- Draw Ellipse Button -->
-                        <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                        <Button Click="DrawEllipseButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
                             <Image Source="Assets/ellipse.png"/>
                         </Button>
                         <!-- Draw Triangle Button -->
-                        <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                        <Button Click="DrawTriangleButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
                             <Image Source="Assets/triangle.png"/>
                         </Button>
                     </StackPanel>
@@ -122,7 +122,8 @@
             <Border Grid.Column="2" Style="{StaticResource FunctionalBarSectionBorder_Style}">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
                     <!-- Color Picker -->
-                    <xctk:ColorPicker Width="32" Height="32" Margin="0, 0, 0, 8"></xctk:ColorPicker>
+                    <xctk:ColorPicker x:Name="PaintColorPicker" SelectedColor="Black" SelectedColorChanged="PaintColorPicker_SelectedColorChanged"
+                                      Width="60" Height="32" Margin="0, 0, 0, 8"></xctk:ColorPicker>
 
                     <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Color</TextBlock>
                 </StackPanel>
@@ -131,7 +132,7 @@
             <Border Grid.Column="3" Style="{StaticResource FunctionalBarSectionBorder_Style}">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
                     <!-- Size Button -->
-                    <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                    <Button Click="SizeButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
                         <Image Source="Assets/thick.png"/>
                     </Button>
                     <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Size</TextBlock>
@@ -141,7 +142,7 @@
             <Border Grid.Column="4" Style="{StaticResource FunctionalBarSectionBorder_Style}">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
                     <!-- Stroke Style Button -->
-                    <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                    <Button Click="StrokeButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
                         <Image Source="Assets/stroke.png"/>
                     </Button>
                     <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke</TextBlock>
@@ -151,7 +152,7 @@
             <Border Grid.Column="5" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
                     <!-- Layers Button -->
-                    <Button Style="{StaticResource FunctionalBarButtonImage_Style}">
+                    <Button Click="LayersButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
                         <Image Source="Assets/layer.png"/>
                     </Button>
                     <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Layers</TextBlock>
