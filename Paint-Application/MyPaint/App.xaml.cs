@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace Paint_Application
+namespace MyPaint
 {
     /// <summary>
     /// Interaction logic for App.xaml

@@ -3,7 +3,6 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
-    <RootNamespace>Paint_Application</RootNamespace>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -24,16 +23,12 @@
     <None Remove="Assets\save.png" />
     <None Remove="Assets\select.png" />
     <None Remove="Assets\square.png" />
+    <None Remove="Assets\star.png" />
     <None Remove="Assets\stroke.png" />
+    <None Remove="Assets\text.png" />
     <None Remove="Assets\thick.png" />
     <None Remove="Assets\triangle.png" />
     <None Remove="Assets\undo.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Assets\select.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -73,10 +68,19 @@
     <Content Include="Assets\save.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\select.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\square.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Assets\star.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\stroke.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\text.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\thick.png">
@@ -92,6 +96,11 @@
 
   <ItemGroup>
     <PackageReference Include="Extended.Wpf.Toolkit" Version="4.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IShape\IShape.csproj" />
+    <ProjectReference Include="..\MyLine\MyLine.csproj" />
   </ItemGroup>
 
 </Project>
