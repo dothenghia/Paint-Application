@@ -3,6 +3,7 @@ using MyShapes;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace MyRectangle
 {
@@ -34,15 +35,32 @@ namespace MyRectangle
         // Convert the object to a UIElement - Draw the shape
         public UIElement Convert()
         {
-            return new Line()
+            Rectangle rectangle = new Rectangle()
             {
-                X1 = startPoint.X,
-                Y1 = startPoint.Y,
-                X2 = endPoint.X,
-                Y2 = endPoint.Y,
                 StrokeThickness = 1,
                 Stroke = new SolidColorBrush(Colors.Red)
-            }; ;
+            };
+            if (startPoint.X < endPoint.X)
+            {
+                rectangle.Width = endPoint.X - startPoint.X;
+                rectangle.SetValue(Canvas.LeftProperty, startPoint.X);
+            }
+            else
+            {
+                rectangle.Width = startPoint.X - endPoint.X;
+                rectangle.SetValue(Canvas.LeftProperty, endPoint.X);
+            }
+            if (startPoint.Y < endPoint.Y)
+            {
+                rectangle.Height = endPoint.Y - startPoint.Y;
+                rectangle.SetValue(Canvas.TopProperty, startPoint.Y);
+            }
+            else
+            {
+                rectangle.Height = startPoint.Y - endPoint.Y;
+                rectangle.SetValue(Canvas.TopProperty, endPoint.Y);
+            }
+            return rectangle;
         }
     }
 

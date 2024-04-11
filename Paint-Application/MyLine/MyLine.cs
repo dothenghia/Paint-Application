@@ -42,7 +42,7 @@ namespace MyLine
                 Y2 = endPoint.Y,
                 StrokeThickness = 1,
                 Stroke = new SolidColorBrush(Colors.Red)
-            }; ;
+            };
         }
     }
 }

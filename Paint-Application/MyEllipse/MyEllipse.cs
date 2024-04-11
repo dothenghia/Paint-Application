@@ -3,6 +3,7 @@ using MyShapes;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace MyEllipse
 {
@@ -34,15 +35,32 @@ namespace MyEllipse
         // Convert the object to a UIElement - Draw the shape
         public UIElement Convert()
         {
-            return new Line()
+            Ellipse ellipse = new Ellipse()
             {
-                X1 = startPoint.X,
-                Y1 = startPoint.Y,
-                X2 = endPoint.X,
-                Y2 = endPoint.Y,
                 StrokeThickness = 1,
                 Stroke = new SolidColorBrush(Colors.Red)
-            }; ;
+            };
+            if (startPoint.X < endPoint.X)
+            {
+                ellipse.Width = endPoint.X - startPoint.X;
+                ellipse.SetValue(Canvas.LeftProperty, startPoint.X);
+            }
+            else
+            {
+                ellipse.Width = startPoint.X - endPoint.X;
+                ellipse.SetValue(Canvas.LeftProperty, endPoint.X);
+            }
+            if (startPoint.Y < endPoint.Y)
+            {
+                ellipse.Height = endPoint.Y - startPoint.Y;
+                ellipse.SetValue(Canvas.TopProperty, startPoint.Y);
+            }
+            else
+            {
+                ellipse.Height = startPoint.Y - endPoint.Y;
+                ellipse.SetValue(Canvas.TopProperty, endPoint.Y);
+            }
+            return ellipse;
         }
     }
 

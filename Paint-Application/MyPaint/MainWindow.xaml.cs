@@ -24,53 +24,43 @@ namespace MyPaint
 
         List<IShape> prototypeShapes = new List<IShape>(); // Danh sách các hình vẽ có thể chọn từ giao diện (Sản phẩm mẫu)
         List<IShape> drawnShapes = new List<IShape>(); // Danh sách các hình đã vẽ trên canvas (dùng để vẽ lại khi MouseMove)
-        IShape? currentShape = null; // Current||Preview Shape  - Hình vẽ hiện tại đang vẽ
-
+        IShape currentShape; // Current Shape  - Hình vẽ hiện tại đang vẽ
+        bool isDrawing = false; // Is drawing
 
         // ==================== Methods ====================
-        public MainWindow()
-        {
+        public MainWindow() {
             InitializeComponent();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            // Single configuration
-            string folder = AppDomain.CurrentDomain.BaseDirectory;
+            string folder = AppDomain.CurrentDomain.BaseDirectory; // Single configuration
             var fis = new DirectoryInfo(folder).GetFiles("*.dll");
 
-            foreach (var fi in fis)
-            {
-                // Get all types in the assembly (in the DLL)
-                var assembly = Assembly.LoadFrom(fi.FullName);
+            foreach (var fi in fis) {
+                var assembly = Assembly.LoadFrom(fi.FullName); // Get all types in the assembly (in the DLL)
                 var types = assembly.GetTypes();
 
-                foreach (var type in types)
-                {
-                    if ((type.IsClass) && (typeof(IShape).IsAssignableFrom(type)))
-                    {
-                        // Add the shape to the list of prototype shapes
-                        prototypeShapes.Add((IShape)Activator.CreateInstance(type)!);
+                foreach (var type in types) {
+                    if ((type.IsClass) && (typeof(IShape).IsAssignableFrom(type))) {
+                        prototypeShapes.Add((IShape)Activator.CreateInstance(type)!); // Add the shape to the list of prototype shapes
                     }
                 }
             }
 
             RenderShapeButtons(prototypeShapes);
+
+            currentShape = prototypeShapes[0]; // Set the default shape
         }
 
         private void RenderShapeButtons(List<IShape> _prototypeShapes)
         {
-            foreach (var shape in _prototypeShapes)
-            {
+            foreach (var shape in _prototypeShapes) {
                 var button = new Button();
                 button.Tag = shape;
                 Style style = this.FindResource("FunctionalBarButtonImage_Style") as Style;
                 button.Style = style;
-
-                var image = new Image
-                {
-                    Source = new BitmapImage(new Uri(shape.Icon, UriKind.Relative))
-                };
+                var image = new Image { Source = new BitmapImage(new Uri(shape.Icon, UriKind.Relative)) };
                 button.Content = image;
                 button.Click += ShapeButton_Click;
                 Shapes_StackPanel.Children.Add(button);
@@ -89,14 +79,17 @@ namespace MyPaint
 
 
         // ==================== Functional Bar Handlers ====================
+        // --- Select Tool "Select Area"
         private void SelectButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Select"); }
 
+        // --- Select Shape Button
         private void ShapeButton_Click(object sender, RoutedEventArgs e)
         {
             IShape item = (IShape)(sender as Button)!.Tag;
-            Debug.WriteLine(item.Name);
+            currentShape = item;
         }
 
+        // --- Select Color Stroke
         private void PaintColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) { }
 
         private void SizeButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Change Size"); }
@@ -106,9 +99,46 @@ namespace MyPaint
 
 
         // ==================== Main Canvas Handlers ====================
-        private void MainCanvas_MouseDown(object sender, MouseButtonEventArgs e) { }
-        private void MainCanvas_MouseMove(object sender, MouseEventArgs e) { }
-        private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e) { }
+        private void MainCanvas_MouseDown(object sender, MouseButtonEventArgs e)
+        { 
+            startPoint = e.GetPosition(Main_Canvas);
+            currentShape.SetStartPoint(startPoint);
+            isDrawing = false;
+        }
+
+        private void MainCanvas_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                endPoint = e.GetPosition(Main_Canvas);
+
+                if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
+                {
+                    double width = Math.Abs(endPoint.X - startPoint.X);
+                    double height = Math.Abs(endPoint.Y - startPoint.Y);
+                    double edge = Math.Min(width, height);
+
+                    endPoint.X = startPoint.X + edge * Math.Sign(endPoint.X - startPoint.X);
+                    endPoint.Y = startPoint.Y + edge * Math.Sign(endPoint.Y - startPoint.Y);
+                }
+
+                currentShape.SetEndPoint(endPoint);
+
+                // Remove the last shape (preview shape)
+                if (isDrawing == true) { Main_Canvas.Children.RemoveAt(Main_Canvas.Children.Count - 1); }
+
+                // Then re-draw it
+                Main_Canvas.Children.Add(currentShape.Convert());
+                isDrawing = true;
+            }
+        }
+
+
+        private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            IShape clone = (IShape)currentShape.Clone();
+            drawnShapes.Add(clone);
+        }
 
 
 
