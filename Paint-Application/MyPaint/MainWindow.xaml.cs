@@ -25,11 +25,19 @@ namespace MyPaint
         List<IShape> prototypeShapes = new List<IShape>(); // Danh sách các hình vẽ có thể chọn từ giao diện (Sản phẩm mẫu)
         List<IShape> drawnShapes = new List<IShape>(); // Danh sách các hình đã vẽ trên canvas (dùng để vẽ lại khi MouseMove)
         IShape currentShape; // Current Shape  - Hình vẽ hiện tại đang vẽ
-        bool isDrawing = false; // Is drawing
+        bool isDrawing = false;
+
+        Dictionary<string, DoubleCollection> dashCollections = new Dictionary<string, DoubleCollection>();
+
 
         // ==================== Methods ====================
         public MainWindow() {
             InitializeComponent();
+            dashCollections["Solid"] = null;
+            dashCollections["Dash"] = new DoubleCollection { 4, 4 };
+            dashCollections["Dot"] = new DoubleCollection { 1, 2 };
+            dashCollections["Dash Dot"] = new DoubleCollection { 4, 2, 1, 2 };
+            dashCollections["Dash Dot Dot"] = new DoubleCollection { 4, 2, 1, 2, 1, 2 };
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -48,7 +56,7 @@ namespace MyPaint
                 }
             }
 
-            RenderShapeButtons(prototypeShapes);
+            RenderShapeButtons(prototypeShapes); // Render the shape buttons
 
             currentShape = prototypeShapes[0]; // Set the default shape
         }
@@ -90,7 +98,28 @@ namespace MyPaint
         }
 
         // --- Select Color Stroke
-        private void PaintColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) { }
+        private void StrokeColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) 
+        {
+            SolidColorBrush color = new SolidColorBrush(e.NewValue.Value);
+            foreach (IShape shape in prototypeShapes) { shape.SetStrokeColor(color); }
+        }
+        // --- Select Stroke Thickness
+        private void StrokeThicknessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            StrokeThickness_TextBlock.Text = Math.Ceiling(e.NewValue).ToString();
+            foreach (IShape shape in prototypeShapes) { shape.SetStrokeThickness(e.NewValue); }
+        }
+        // --- Select Stroke Dash
+        private void StrokeDashComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ComboBoxItem selectedItem = (ComboBoxItem)StrokeDash_ComboBox.SelectedItem;
+            string selectedTag = selectedItem.Tag.ToString();
+            
+            foreach (IShape shape in prototypeShapes) {
+                if (selectedTag == "Solid") { shape.SetStrokeDashArray(null); }
+                else { shape.SetStrokeDashArray(dashCollections[selectedTag]); }
+            }
+        }
 
         private void SizeButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Change Size"); }
         private void StrokeButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Change Stroke"); }

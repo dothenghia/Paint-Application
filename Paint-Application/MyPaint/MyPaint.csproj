@@ -24,6 +24,11 @@
     <None Remove="Assets\select.png" />
     <None Remove="Assets\square.png" />
     <None Remove="Assets\star.png" />
+    <None Remove="Assets\stroke-dash-dot-dot.png" />
+    <None Remove="Assets\stroke-dash-dot.png" />
+    <None Remove="Assets\stroke-dash.png" />
+    <None Remove="Assets\stroke-dot.png" />
+    <None Remove="Assets\stroke-solid.png" />
     <None Remove="Assets\stroke.png" />
     <None Remove="Assets\text.png" />
     <None Remove="Assets\thick.png" />
@@ -75,6 +80,21 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\star.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\stroke-dash-dot-dot.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\stroke-dash-dot.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\stroke-dash.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\stroke-dot.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\stroke-solid.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\stroke.png">

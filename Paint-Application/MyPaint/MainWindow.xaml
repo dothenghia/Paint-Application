@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:MyPaint"
         mc:Ignorable="d"
         Title="Pain"
-        Height="450" Width="800"
+        Height="560" Width="800"
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded">
 
@@ -23,7 +23,6 @@
             <Setter Property="Width" Value="1" />
             <Setter Property="Background" Value="LightGray" />
         </Style>
-
 
         <!-- Style for FunctionalBar Section Border -->
         <Style x:Key="FunctionalBarSectionBorder_Style" TargetType="Border">
@@ -50,7 +49,7 @@
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
         </Style>
-
+       
     </Window.Resources>
 
 
@@ -107,8 +106,8 @@
             <Border Grid.Column="2" Style="{StaticResource FunctionalBarSectionBorder_Style}">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
                     <!-- Color Picker -->
-                    <xctk:ColorPicker x:Name="PaintColorPicker" SelectedColor="Black" SelectedColorChanged="PaintColorPicker_SelectedColorChanged"
-                                      Width="60" Height="32" Margin="0, 0, 0, 8"></xctk:ColorPicker>
+                    <xctk:ColorPicker SelectedColor="Black" SelectedColorChanged="StrokeColorPicker_SelectedColorChanged"
+                                      Width="80" Height="32" Margin="4, 0, 4, 8"></xctk:ColorPicker>
 
                     <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Color</TextBlock>
                 </StackPanel>
@@ -116,10 +115,13 @@
 
             <Border Grid.Column="3" Style="{StaticResource FunctionalBarSectionBorder_Style}">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                    <!-- Size Button -->
-                    <Button Click="SizeButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
-                        <Image Source="Assets/thick.png"/>
-                    </Button>
+                    <!-- Stroke Thickness Slider -->
+                    <TextBlock x:Name="StrokeThickness_TextBlock" Style="{StaticResource FunctionalBarSectionTitle_Style}">1</TextBlock>
+
+                    <Slider Width="100" Margin="4, 0, 4, 8"
+                            Minimum="1" Maximum="10" Value="1"
+                            ValueChanged="StrokeThicknessSlider_ValueChanged"/>
+
                     <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Size</TextBlock>
                 </StackPanel>
             </Border>
@@ -127,9 +129,42 @@
             <Border Grid.Column="4" Style="{StaticResource FunctionalBarSectionBorder_Style}">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
                     <!-- Stroke Style Button -->
-                    <Button Click="StrokeButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
-                        <Image Source="Assets/stroke.png"/>
-                    </Button>
+
+                    <ComboBox x:Name="StrokeDash_ComboBox" SelectionChanged="StrokeDashComboBox_SelectionChanged"
+                              Height="36" Width="100" Margin="4, 0, 4, 8" SelectedIndex="0">
+                        <ComboBoxItem Tag="Solid">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Assets/stroke-solid.png" Height="32" Width="70"/>
+                                <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Solid</TextBlock>
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem Tag="Dash">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Assets/stroke-dash.png" Height="32" Width="70"/>
+                                <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Dash</TextBlock>
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem Tag="Dot">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Assets/stroke-dot.png" Height="32" Width="70"/>
+                                <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Dot</TextBlock>
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem Tag="Dash Dot">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Assets/stroke-dash-dot.png" Height="32" Width="70"/>
+                                <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Dash Dot</TextBlock>
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem Tag="Dash Dot Dot">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="Assets/stroke-dash-dot-dot.png" Height="32" Width="70"/>
+                                <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Dash Dot Dot</TextBlock>
+                            </StackPanel>
+                        </ComboBoxItem>
+
+                    </ComboBox>
+                    
                     <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke</TextBlock>
                 </StackPanel>
             </Border>
