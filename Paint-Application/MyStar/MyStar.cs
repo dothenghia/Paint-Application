@@ -49,15 +49,32 @@ namespace MyStar
         // Convert the object to a UIElement - Draw the shape
         public UIElement Convert()
         {
-            return new Line()
+            double width = endPoint.X - startPoint.X;
+            double height = endPoint.Y - startPoint.Y;
+
+            Point[] points = new Point[5];
+            double cx = width / 2;
+            double cy = height / 2;
+            double theta = -Math.PI / 2;
+            double dtheta = Math.PI * 0.8;
+
+            for (int i = 0; i < 5; i++)
             {
-                X1 = startPoint.X,
-                Y1 = startPoint.Y,
-                X2 = endPoint.X,
-                Y2 = endPoint.Y,
-                StrokeThickness = 1,
-                Stroke = new SolidColorBrush(Colors.Red)
-            }; ;
+                points[i].X = startPoint.X + cx + cx * Math.Cos(theta);
+                points[i].Y = startPoint.Y + cy + cy * Math.Sin(theta);
+                theta += dtheta;
+            }
+
+            // Create a Polygon with the calculated points
+            Polygon starPolygon = new Polygon()
+            {
+                Points = new PointCollection(points),
+                Stroke = strokeColor,
+                StrokeThickness = strokeThickness,
+                StrokeDashArray = strokeDashArray
+            };
+
+            return starPolygon;
         }
     }
 
