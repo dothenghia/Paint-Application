@@ -49,15 +49,20 @@ namespace MyTriangle
         // Convert the object to a UIElement - Draw the shape
         public UIElement Convert()
         {
-            return new Line()
+            Polygon triangle = new Polygon();
+
+            triangle.Points = new PointCollection()
             {
-                X1 = startPoint.X,
-                Y1 = startPoint.Y,
-                X2 = endPoint.X,
-                Y2 = endPoint.Y,
-                StrokeThickness = 1,
-                Stroke = new SolidColorBrush(Colors.Red)
-            }; ;
+                new Point(startPoint.X, endPoint.Y),
+                new Point((startPoint.X + endPoint.X) / 2, startPoint.Y),
+                new Point(endPoint.X, endPoint.Y)
+            };
+
+            triangle.Stroke = strokeColor;
+            triangle.StrokeThickness = strokeThickness;
+            triangle.StrokeDashArray = strokeDashArray;
+
+            return triangle;
         }
     }
 
