@@ -11,9 +11,12 @@ namespace MyLine
         // ==================== Attributes ====================
         public string Name => "Line"; // Name of the shape
         public string Icon => "Assets/line.png"; // Path to the icon
-        public Point startPoint; // Start point of the shape
-        public Point endPoint; // End point of the shape
+        private Point startPoint; // Start point of the shape
+        private Point endPoint; // End point of the shape
 
+        private SolidColorBrush strokeColor = Brushes.Black; // Stroke color
+        private double strokeThickness = 1; // Stroke thickness
+        private DoubleCollection? strokeDashArray = null; // Stroke dash array
 
         // ==================== Methods ====================
         public void SetStartPoint(Point point)
@@ -23,6 +26,18 @@ namespace MyLine
         public void SetEndPoint(Point point)
         {
             endPoint = point;
+        }
+        public void SetStrokeColor(SolidColorBrush color)
+        {
+            strokeColor = color;
+        }
+        public void SetStrokeThickness(double thickness)
+        {
+            strokeThickness = thickness;
+        }
+        public void SetStrokeDashArray(DoubleCollection dashArray)
+        {
+            strokeDashArray = dashArray;
         }
 
         // Clone the object
@@ -40,8 +55,9 @@ namespace MyLine
                 Y1 = startPoint.Y,
                 X2 = endPoint.X,
                 Y2 = endPoint.Y,
-                StrokeThickness = 1,
-                Stroke = new SolidColorBrush(Colors.Red)
+                Stroke = strokeColor,
+                StrokeThickness = strokeThickness,
+                StrokeDashArray = strokeDashArray
             };
         }
     }

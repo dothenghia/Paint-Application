@@ -12,9 +12,12 @@ namespace MyEllipse
         // ==================== Attributes ====================
         public string Name => "Ellipse"; // Name of the shape
         public string Icon => "Assets/ellipse.png"; // Path to the icon
-        public Point startPoint; // Start point of the shape
-        public Point endPoint; // End point of the shape
+        private Point startPoint; // Start point of the shape
+        private Point endPoint; // End point of the shape
 
+        private SolidColorBrush strokeColor = Brushes.Black; // Stroke color
+        private double strokeThickness = 1; // Stroke thickness
+        private DoubleCollection strokeDashArray = new DoubleCollection(); // Stroke dash array
 
         // ==================== Methods ====================
         public void SetStartPoint(Point point)
@@ -24,6 +27,18 @@ namespace MyEllipse
         public void SetEndPoint(Point point)
         {
             endPoint = point;
+        }
+        public void SetStrokeColor(SolidColorBrush color)
+        {
+            strokeColor = color;
+        }
+        public void SetStrokeThickness(double thickness)
+        {
+            strokeThickness = thickness;
+        }
+        public void SetStrokeDashArray(DoubleCollection dashArray)
+        {
+            strokeDashArray = dashArray;
         }
 
         // Clone the object
@@ -37,8 +52,9 @@ namespace MyEllipse
         {
             Ellipse ellipse = new Ellipse()
             {
-                StrokeThickness = 1,
-                Stroke = new SolidColorBrush(Colors.Red)
+                StrokeThickness = strokeThickness,
+                Stroke = strokeColor,
+                StrokeDashArray = strokeDashArray
             };
             if (startPoint.X < endPoint.X)
             {
