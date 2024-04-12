@@ -9,13 +9,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IShape", "IShape\IShape.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyLine", "MyLine\MyLine.csproj", "{7CA193A1-7056-4AC5-940D-25A23E8C4CD8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyRectangle", "MyRectangle\MyRectangle.csproj", "{0966B7F3-05AA-44D7-A17B-B3DCBD1A4F9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyRectangle", "MyRectangle\MyRectangle.csproj", "{0966B7F3-05AA-44D7-A17B-B3DCBD1A4F9A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyEllipse", "MyEllipse\MyEllipse.csproj", "{FD888313-2614-41FE-AC03-FC3FAA176395}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyEllipse", "MyEllipse\MyEllipse.csproj", "{FD888313-2614-41FE-AC03-FC3FAA176395}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyTriangle", "MyTriangle\MyTriangle.csproj", "{C08A27A2-7C40-4385-ACD5-315E1E4DE3DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyTriangle", "MyTriangle\MyTriangle.csproj", "{C08A27A2-7C40-4385-ACD5-315E1E4DE3DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyStar", "MyStar\MyStar.csproj", "{4F93DA10-D9AB-4F26-AC48-09BD11D4AF0C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyStar", "MyStar\MyStar.csproj", "{4F93DA10-D9AB-4F26-AC48-09BD11D4AF0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLeftArrow", "MyLeftArrow\MyLeftArrow.csproj", "{1734FC5F-05E1-4C60-ADC4-32409885B213}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyRightArrow", "MyRightArrow\MyRightArrow.csproj", "{64F60605-F5BC-41BD-B7C4-20EDC7A0722A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyUpArrow", "MyUpArrow\MyUpArrow.csproj", "{F37CA410-3ACA-4C4D-94BF-3D0C0CDDD94E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyDownArrow", "MyDownArrow\MyDownArrow.csproj", "{1DEC7E6B-3429-415A-8F72-C9A041F0378F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +59,22 @@ Global
 		{4F93DA10-D9AB-4F26-AC48-09BD11D4AF0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F93DA10-D9AB-4F26-AC48-09BD11D4AF0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F93DA10-D9AB-4F26-AC48-09BD11D4AF0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1734FC5F-05E1-4C60-ADC4-32409885B213}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1734FC5F-05E1-4C60-ADC4-32409885B213}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1734FC5F-05E1-4C60-ADC4-32409885B213}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1734FC5F-05E1-4C60-ADC4-32409885B213}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64F60605-F5BC-41BD-B7C4-20EDC7A0722A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64F60605-F5BC-41BD-B7C4-20EDC7A0722A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64F60605-F5BC-41BD-B7C4-20EDC7A0722A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64F60605-F5BC-41BD-B7C4-20EDC7A0722A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F37CA410-3ACA-4C4D-94BF-3D0C0CDDD94E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F37CA410-3ACA-4C4D-94BF-3D0C0CDDD94E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F37CA410-3ACA-4C4D-94BF-3D0C0CDDD94E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F37CA410-3ACA-4C4D-94BF-3D0C0CDDD94E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DEC7E6B-3429-415A-8F72-C9A041F0378F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DEC7E6B-3429-415A-8F72-C9A041F0378F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DEC7E6B-3429-415A-8F72-C9A041F0378F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DEC7E6B-3429-415A-8F72-C9A041F0378F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
