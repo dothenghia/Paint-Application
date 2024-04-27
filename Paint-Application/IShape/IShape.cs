@@ -1,5 +1,6 @@
 
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace MyShapes
@@ -8,6 +9,7 @@ namespace MyShapes
     {
         string Name { get; }
         string Icon { get; }
+        //string Text { get; set; }
 
         void SetStartPoint(Point point);
         void SetEndPoint(Point point);
@@ -15,7 +17,7 @@ namespace MyShapes
         void SetStrokeColor(SolidColorBrush color);
         void SetStrokeThickness(double thickness);
         void SetStrokeDashArray(DoubleCollection dashArray);
-        
-        UIElement Convert();
+
+        Canvas Convert();
     }
 }

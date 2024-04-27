@@ -3,6 +3,7 @@ using MyShapes;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace MyTriangle
 {
@@ -47,22 +48,36 @@ namespace MyTriangle
         }
 
         // Convert the object to a UIElement - Draw the shape
-        public UIElement Convert()
+        public Canvas Convert()
         {
+            // Calculate canvas position and size
+            double canvasLeft = Math.Min(startPoint.X, endPoint.X);
+            double canvasTop = Math.Min(startPoint.Y, endPoint.Y);
+            double canvasWidth = Math.Abs(endPoint.X - startPoint.X);
+            double canvasHeight = Math.Abs(endPoint.Y - startPoint.Y);
+
+            // Set canvas position and size
+            Canvas frameCanvas = new Canvas();
+            Canvas.SetLeft(frameCanvas, canvasLeft);
+            Canvas.SetTop(frameCanvas, canvasTop);
+            frameCanvas.Width = canvasWidth;
+            frameCanvas.Height = canvasHeight;
+
             Polygon triangle = new Polygon();
 
             triangle.Points = new PointCollection()
             {
-                new Point(startPoint.X, endPoint.Y),
-                new Point((startPoint.X + endPoint.X) / 2, startPoint.Y),
-                new Point(endPoint.X, endPoint.Y)
+                new Point(startPoint.X - canvasLeft, endPoint.Y - canvasTop),
+                new Point((startPoint.X - canvasLeft + endPoint.X - canvasLeft) / 2, startPoint.Y - canvasTop),
+                new Point(endPoint.X - canvasLeft, endPoint.Y - canvasTop)
             };
 
             triangle.Stroke = strokeColor;
             triangle.StrokeThickness = strokeThickness;
             triangle.StrokeDashArray = strokeDashArray;
 
-            return triangle;
+            frameCanvas.Children.Add(triangle);
+            return frameCanvas;
         }
     }
 

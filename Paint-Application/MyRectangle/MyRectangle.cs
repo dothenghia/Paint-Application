@@ -48,35 +48,32 @@ namespace MyRectangle
         }
 
         // Convert the object to a UIElement - Draw the shape
-        public UIElement Convert()
+        public Canvas Convert()
         {
+            // Calculate canvas position and size
+            double canvasLeft = Math.Min(startPoint.X, endPoint.X);
+            double canvasTop = Math.Min(startPoint.Y, endPoint.Y);
+            double canvasWidth = Math.Abs(endPoint.X - startPoint.X);
+            double canvasHeight = Math.Abs(endPoint.Y - startPoint.Y);
+
+            // Set canvas position and size
+            Canvas frameCanvas = new Canvas();
+            Canvas.SetLeft(frameCanvas, canvasLeft);
+            Canvas.SetTop(frameCanvas, canvasTop);
+            frameCanvas.Width = canvasWidth;
+            frameCanvas.Height = canvasHeight;
+
             Rectangle rectangle = new Rectangle()
             {
+                Width = canvasWidth,
+                Height = canvasHeight,
                 StrokeThickness = strokeThickness,
                 Stroke = strokeColor,
                 StrokeDashArray = strokeDashArray
             };
-            if (startPoint.X < endPoint.X)
-            {
-                rectangle.Width = endPoint.X - startPoint.X;
-                rectangle.SetValue(Canvas.LeftProperty, startPoint.X);
-            }
-            else
-            {
-                rectangle.Width = startPoint.X - endPoint.X;
-                rectangle.SetValue(Canvas.LeftProperty, endPoint.X);
-            }
-            if (startPoint.Y < endPoint.Y)
-            {
-                rectangle.Height = endPoint.Y - startPoint.Y;
-                rectangle.SetValue(Canvas.TopProperty, startPoint.Y);
-            }
-            else
-            {
-                rectangle.Height = startPoint.Y - endPoint.Y;
-                rectangle.SetValue(Canvas.TopProperty, endPoint.Y);
-            }
-            return rectangle;
+
+            frameCanvas.Children.Add(rectangle);
+            return frameCanvas;
         }
     }
 

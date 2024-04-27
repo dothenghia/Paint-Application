@@ -48,35 +48,32 @@ namespace MyEllipse
         }
 
         // Convert the object to a UIElement - Draw the shape
-        public UIElement Convert()
+        public Canvas Convert()
         {
+            // Calculate canvas position and size
+            double canvasLeft = Math.Min(startPoint.X, endPoint.X);
+            double canvasTop = Math.Min(startPoint.Y, endPoint.Y);
+            double canvasWidth = Math.Abs(endPoint.X - startPoint.X);
+            double canvasHeight = Math.Abs(endPoint.Y - startPoint.Y);
+
+            // Set canvas position and size
+            Canvas frameCanvas = new Canvas();
+            Canvas.SetLeft(frameCanvas, canvasLeft);
+            Canvas.SetTop(frameCanvas, canvasTop);
+            frameCanvas.Width = canvasWidth;
+            frameCanvas.Height = canvasHeight;
+
             Ellipse ellipse = new Ellipse()
             {
+                Width = canvasWidth,
+                Height = canvasHeight,
                 StrokeThickness = strokeThickness,
                 Stroke = strokeColor,
                 StrokeDashArray = strokeDashArray
             };
-            if (startPoint.X < endPoint.X)
-            {
-                ellipse.Width = endPoint.X - startPoint.X;
-                ellipse.SetValue(Canvas.LeftProperty, startPoint.X);
-            }
-            else
-            {
-                ellipse.Width = startPoint.X - endPoint.X;
-                ellipse.SetValue(Canvas.LeftProperty, endPoint.X);
-            }
-            if (startPoint.Y < endPoint.Y)
-            {
-                ellipse.Height = endPoint.Y - startPoint.Y;
-                ellipse.SetValue(Canvas.TopProperty, startPoint.Y);
-            }
-            else
-            {
-                ellipse.Height = startPoint.Y - endPoint.Y;
-                ellipse.SetValue(Canvas.TopProperty, endPoint.Y);
-            }
-            return ellipse;
+
+            frameCanvas.Children.Add(ellipse);
+            return frameCanvas;
         }
     }
 

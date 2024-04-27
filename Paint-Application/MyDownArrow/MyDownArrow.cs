@@ -3,6 +3,7 @@ using MyShapes;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace MyDownArrow
 {
@@ -47,17 +48,30 @@ namespace MyDownArrow
         }
 
         // Convert the object to a UIElement - Draw the shape
-        public UIElement Convert()
+        public Canvas Convert()
         {
+            // Calculate canvas position and size
+            double canvasLeft = Math.Min(startPoint.X, endPoint.X);
+            double canvasTop = Math.Min(startPoint.Y, endPoint.Y);
+            double canvasWidth = Math.Abs(endPoint.X - startPoint.X);
+            double canvasHeight = Math.Abs(endPoint.Y - startPoint.Y);
+
+            // Set canvas position and size
+            Canvas frameCanvas = new Canvas();
+            Canvas.SetLeft(frameCanvas, canvasLeft);
+            Canvas.SetTop(frameCanvas, canvasTop);
+            frameCanvas.Width = canvasWidth;
+            frameCanvas.Height = canvasHeight;
+
             Point[] points = new Point[]
             {
-                new Point(startPoint.X + (endPoint.X - startPoint.X) * 0.375, startPoint.Y),
-                new Point(startPoint.X + (endPoint.X - startPoint.X) * 0.625, startPoint.Y),
-                new Point(startPoint.X + (endPoint.X - startPoint.X) * 0.625, endPoint.Y - (endPoint.Y - startPoint.Y) * 0.25),
-                new Point(startPoint.X + (endPoint.X - startPoint.X) * 0.75, endPoint.Y - (endPoint.Y - startPoint.Y) * 0.25),
-                new Point(startPoint.X + (endPoint.X - startPoint.X) * 0.5, endPoint.Y),
-                new Point(startPoint.X + (endPoint.X - startPoint.X) * 0.25, endPoint.Y - (endPoint.Y - startPoint.Y) * 0.25),
-                new Point(startPoint.X + (endPoint.X - startPoint.X) * 0.375, endPoint.Y - (endPoint.Y - startPoint.Y) * 0.25)
+                new Point(canvasWidth * 0.25, 0),
+                new Point(canvasWidth * 0.75, 0),
+                new Point(canvasWidth * 0.75, canvasHeight * 0.5),
+                new Point(canvasWidth * 1, canvasHeight * 0.5),
+                new Point(canvasWidth * 0.5, canvasHeight),
+                new Point(canvasWidth * 0, canvasHeight * 0.5),
+                new Point(canvasWidth * 0.25, canvasHeight * 0.5)
             };
 
             // Create a Polygon with the calculated points
@@ -69,7 +83,8 @@ namespace MyDownArrow
                 StrokeDashArray = strokeDashArray
             };
 
-            return downArrowPolygon;
+            frameCanvas.Children.Add(downArrowPolygon);
+            return frameCanvas;
         }
     }
 

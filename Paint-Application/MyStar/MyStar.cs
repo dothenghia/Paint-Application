@@ -3,6 +3,7 @@ using MyShapes;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace MyStar
 {
@@ -47,22 +48,38 @@ namespace MyStar
         }
 
         // Convert the object to a UIElement - Draw the shape
-        public UIElement Convert()
+        public Canvas Convert()
         {
-            double width = endPoint.X - startPoint.X;
-            double height = endPoint.Y - startPoint.Y;
+            // Calculate canvas position and size
+            double canvasLeft = Math.Min(startPoint.X, endPoint.X);
+            double canvasTop = Math.Min(startPoint.Y, endPoint.Y);
+            double canvasWidth = Math.Abs(endPoint.X - startPoint.X);
+            double canvasHeight = Math.Abs(endPoint.Y - startPoint.Y);
 
-            Point[] points = new Point[5];
-            double cx = width / 2;
-            double cy = height / 2;
-            double theta = -Math.PI / 2;
-            double dtheta = Math.PI * 0.8;
+            // Set canvas position and size
+            Canvas frameCanvas = new Canvas();
+            Canvas.SetLeft(frameCanvas, canvasLeft);
+            Canvas.SetTop(frameCanvas, canvasTop);
+            frameCanvas.Width = canvasWidth;
+            frameCanvas.Height = canvasHeight;
 
-            for (int i = 0; i < 5; i++)
+            double centerX = canvasWidth / 2;
+            double centerY = canvasHeight / 2;
+            double radius = Math.Min(canvasWidth, canvasHeight) / 2;
+
+            Point[] points = new Point[10];
+            double angleIncrement = 2 * Math.PI / 10; // 5 points in total, each point separated by 2 * Math.PI / 5 radians
+            double currentAngle = -Math.PI / 2; // Start from the top point of the star
+            for (int i = 0; i < 10; i++)
             {
-                points[i].X = startPoint.X + cx + cx * Math.Cos(theta);
-                points[i].Y = startPoint.Y + cy + cy * Math.Sin(theta);
-                theta += dtheta;
+                double x = centerX + (radius * Math.Cos(currentAngle) * canvasWidth / canvasHeight);
+                double y = centerY + (radius * Math.Sin(currentAngle) * canvasHeight / canvasWidth);
+                points[i] = new Point(x, y);
+                currentAngle += angleIncrement;
+                x = centerX + (radius / 2.5 * Math.Cos(currentAngle) * canvasWidth / canvasHeight);
+                y = centerY + (radius / 2.5 * Math.Sin(currentAngle) * canvasHeight / canvasWidth);
+                points[++i] = new Point(x, y);
+                currentAngle += angleIncrement;
             }
 
             // Create a Polygon with the calculated points
@@ -74,8 +91,12 @@ namespace MyStar
                 StrokeDashArray = strokeDashArray
             };
 
-            return starPolygon;
+            frameCanvas.Children.Add(starPolygon);
+            return frameCanvas;
         }
+
+
+
     }
 
 }
