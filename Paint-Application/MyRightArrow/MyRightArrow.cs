@@ -16,6 +16,7 @@ namespace MyRightArrow
         private Point endPoint; // End point of the shape
 
         private SolidColorBrush strokeColor = Brushes.Black; // Stroke color
+        private SolidColorBrush fillColor = Brushes.White; // Fil color
         private double strokeThickness = 1; // Stroke thickness
         private DoubleCollection strokeDashArray = new DoubleCollection(); // Stroke dash array
 
@@ -80,7 +81,8 @@ namespace MyRightArrow
                 Points = new PointCollection(points),
                 Stroke = strokeColor,
                 StrokeThickness = strokeThickness,
-                StrokeDashArray = strokeDashArray
+                StrokeDashArray = strokeDashArray,
+                Fill = fillColor
             };
 
             frameCanvas.Children.Add(rightArrowPolygon);

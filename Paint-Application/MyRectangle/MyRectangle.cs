@@ -16,6 +16,7 @@ namespace MyRectangle
         private Point endPoint; // End point of the shape
 
         private SolidColorBrush strokeColor = Brushes.Black; // Stroke color
+        private SolidColorBrush fillColor = Brushes.White; // Fil color
         private double strokeThickness = 1; // Stroke thickness
         private DoubleCollection strokeDashArray = new DoubleCollection(); // Stroke dash array
 
@@ -69,7 +70,8 @@ namespace MyRectangle
                 Height = canvasHeight,
                 StrokeThickness = strokeThickness,
                 Stroke = strokeColor,
-                StrokeDashArray = strokeDashArray
+                StrokeDashArray = strokeDashArray,
+                Fill = fillColor
             };
 
             frameCanvas.Children.Add(rectangle);

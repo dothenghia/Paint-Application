@@ -17,6 +17,7 @@ namespace MyLine
         private Point endPoint; // End point of the shape
 
         private SolidColorBrush strokeColor = Brushes.Black; // Stroke color
+        private SolidColorBrush fillColor = Brushes.White; // Fil color
         private double strokeThickness = 1; // Stroke thickness
         private DoubleCollection? strokeDashArray = null; // Stroke dash array
 

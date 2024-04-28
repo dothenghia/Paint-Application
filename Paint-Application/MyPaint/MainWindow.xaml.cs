@@ -21,13 +21,15 @@ namespace MyPaint
         // ==================== Attributes ====================
         public Point startPoint; // Start point of the shape
         public Point endPoint; // End point of the shape
+        Dictionary<string, DoubleCollection> dashCollections = new Dictionary<string, DoubleCollection>();
 
         List<IShape> prototypeShapes = new List<IShape>(); // Danh sách các hình vẽ có thể chọn từ giao diện (Sản phẩm mẫu)
-        List<IShape> drawnShapes = new List<IShape>(); // Danh sách các hình đã vẽ trên canvas (dùng để vẽ lại khi MouseMove)
+        List<IShape> drawnShapes = new List<IShape>(); // Danh sách các hình đã vẽ trên canvas
         IShape currentShape; // Current Shape  - Hình vẽ hiện tại đang vẽ
-        bool isDrawing = false;
 
-        Dictionary<string, DoubleCollection> dashCollections = new Dictionary<string, DoubleCollection>();
+        bool isDrawing = false; // Is Drawing - Tránh trường hợp xóa hình vẽ khi đang vẽ
+        int selectingIndex = -1;
+        bool isSelecting = false; // Is Selecting - Tránh trường họp MouseDown vào hình đã chọn
 
 
         // ==================== Methods ====================
@@ -129,15 +131,19 @@ namespace MyPaint
 
         // ==================== Main Canvas Handlers ====================
         private void MainCanvas_MouseDown(object sender, MouseButtonEventArgs e)
-        { 
-            startPoint = e.GetPosition(Main_Canvas);
-            currentShape.SetStartPoint(startPoint);
-            isDrawing = false;
+        {
+            if (isSelecting == false)
+            {
+                Debug.WriteLine("MainCanvas - MouseDown");
+                startPoint = e.GetPosition(Main_Canvas);
+                currentShape.SetStartPoint(startPoint);
+                isDrawing = false;
+            }
         }
 
         private void MainCanvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (isSelecting == false && e.LeftButton == MouseButtonState.Pressed)
             {
                 endPoint = e.GetPosition(Main_Canvas);
 
@@ -157,19 +163,63 @@ namespace MyPaint
                 if (isDrawing == true) { Main_Canvas.Children.RemoveAt(Main_Canvas.Children.Count - 1); }
 
                 // Then re-draw it
-                Main_Canvas.Children.Add(currentShape.Convert());
+                Canvas shapeCanvas = currentShape.Convert();
+                shapeCanvas.PreviewMouseDown += DrawnShape_PreviewMouseDown;
+
+                Main_Canvas.Children.Add(shapeCanvas);
                 isDrawing = true;
             }
         }
 
-
         private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            IShape clone = (IShape)currentShape.Clone();
-            drawnShapes.Add(clone);
+            if (isSelecting == false)
+            {
+                IShape clone = (IShape)currentShape.Clone();
+                drawnShapes.Add(clone);
+            }
         }
 
+        private void DrawnShape_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            isSelecting = true;
+            if (sender is Canvas shapeCanvas)
+            {
+                DrawSelectingShape(shapeCanvas);
+            }
+        }
 
+        private void DrawSelectingShape(Canvas canvas)
+        {
+            // Xóa "Selecting_Rectangle" của shape có selectinIndex
+            if (selectingIndex != -1)
+            {
+                Canvas selectingCanvas = (Canvas)Main_Canvas.Children[selectingIndex];
+                foreach (UIElement child in selectingCanvas.Children)
+                {
+                    if (child is Rectangle rectangle && rectangle.Name == "Selecting_Rectangle")
+                    {
+                        selectingCanvas.Children.Remove(rectangle);
+                        break;
+                    }
+                }
+            }
+
+            // Tạo một Rectangle để vẽ viền cho hình đã chọn
+            Rectangle borderRectangle = new Rectangle
+            {
+                Width = canvas.ActualWidth,
+                Height = canvas.ActualHeight,
+                Stroke = Brushes.Gray,
+                StrokeThickness = 2,
+                StrokeDashArray = new DoubleCollection { 2, 2 },
+                Fill = Brushes.Transparent,
+                Name = "Selecting_Rectangle"
+            };
+
+            canvas.Children.Add(borderRectangle);
+            selectingIndex = Main_Canvas.Children.IndexOf(canvas);
+        }
 
     }
 }
