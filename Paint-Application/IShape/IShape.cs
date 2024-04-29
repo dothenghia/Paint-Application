@@ -14,6 +14,7 @@ namespace MyShapes
         void SetStartPoint(Point point);
         void SetEndPoint(Point point);
 
+        void SetFillColor(SolidColorBrush color);
         void SetStrokeColor(SolidColorBrush color);
         void SetStrokeThickness(double thickness);
         void SetStrokeDashArray(DoubleCollection dashArray);

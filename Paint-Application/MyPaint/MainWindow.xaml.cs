@@ -99,11 +99,16 @@ namespace MyPaint
             currentShape = item;
         }
 
-        // --- Select Color Stroke
+        // --- Select Color Stroke & Fill
         private void StrokeColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) 
         {
             SolidColorBrush color = new SolidColorBrush(e.NewValue.Value);
             foreach (IShape shape in prototypeShapes) { shape.SetStrokeColor(color); }
+        }
+        private void FillColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        {
+            SolidColorBrush color = new SolidColorBrush(e.NewValue.Value);
+            foreach (IShape shape in prototypeShapes) { shape.SetFillColor(color); }
         }
         // --- Select Stroke Thickness
         private void StrokeThicknessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)

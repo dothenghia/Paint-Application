@@ -18,7 +18,7 @@ namespace MyLine
 
         private SolidColorBrush strokeColor = Brushes.Black; // Stroke color
         private SolidColorBrush fillColor = Brushes.White; // Fil color
-        private double strokeThickness = 1; // Stroke thickness
+        private double strokeThickness = 3; // Stroke thickness
         private DoubleCollection? strokeDashArray = null; // Stroke dash array
 
         // ==================== Methods ====================
@@ -29,6 +29,10 @@ namespace MyLine
         public void SetEndPoint(Point point)
         {
             endPoint = point;
+        }
+        public void SetFillColor(SolidColorBrush color)
+        {
+            fillColor = color;
         }
         public void SetStrokeColor(SolidColorBrush color)
         {

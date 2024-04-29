@@ -106,23 +106,35 @@
             <Border Grid.Column="2" Style="{StaticResource FunctionalBarSectionBorder_Style}">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
                     <!-- Color Picker -->
-                    <xctk:ColorPicker SelectedColor="Black" SelectedColorChanged="StrokeColorPicker_SelectedColorChanged"
-                                      Width="80" Height="32" Margin="4, 0, 4, 8"></xctk:ColorPicker>
+                    <StackPanel Orientation="Horizontal">
+                        <xctk:ColorPicker SelectedColor="Black" SelectedColorChanged="StrokeColorPicker_SelectedColorChanged"
+                            Width="80" Height="32" Margin="4, 0, 4, 8"></xctk:ColorPicker>
 
-                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Color</TextBlock>
+                        <xctk:ColorPicker SelectedColor="White" SelectedColorChanged="FillColorPicker_SelectedColorChanged"
+                            Width="80" Height="32" Margin="4, 0, 4, 8"></xctk:ColorPicker>
+                    </StackPanel>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke Color</TextBlock>
+                        <TextBlock Grid.Column="1" Style="{StaticResource FunctionalBarSectionTitle_Style}">Fill Color</TextBlock>
+                    </Grid>
                 </StackPanel>
             </Border>
 
             <Border Grid.Column="3" Style="{StaticResource FunctionalBarSectionBorder_Style}">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
                     <!-- Stroke Thickness Slider -->
-                    <TextBlock x:Name="StrokeThickness_TextBlock" Style="{StaticResource FunctionalBarSectionTitle_Style}">1</TextBlock>
+                    <TextBlock x:Name="StrokeThickness_TextBlock" Style="{StaticResource FunctionalBarSectionTitle_Style}">3</TextBlock>
 
                     <Slider Width="100" Margin="4, 0, 4, 8"
-                            Minimum="1" Maximum="10" Value="1"
+                            Minimum="1" Maximum="10" Value="3"
                             ValueChanged="StrokeThicknessSlider_ValueChanged"/>
 
-                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Size</TextBlock>
+                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke Size</TextBlock>
                 </StackPanel>
             </Border>
 
@@ -165,7 +177,7 @@
 
                     </ComboBox>
                     
-                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke</TextBlock>
+                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke Dash</TextBlock>
                 </StackPanel>
             </Border>
 

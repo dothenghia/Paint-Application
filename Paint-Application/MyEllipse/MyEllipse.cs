@@ -17,7 +17,7 @@ namespace MyEllipse
 
         private SolidColorBrush strokeColor = Brushes.Black; // Stroke color
         private SolidColorBrush fillColor = Brushes.White; // Fil color
-        private double strokeThickness = 1; // Stroke thickness
+        private double strokeThickness = 3; // Stroke thickness
         private DoubleCollection strokeDashArray = new DoubleCollection(); // Stroke dash array
 
         // ==================== Methods ====================
@@ -28,6 +28,10 @@ namespace MyEllipse
         public void SetEndPoint(Point point)
         {
             endPoint = point;
+        }
+        public void SetFillColor(SolidColorBrush color)
+        {
+            fillColor = color;
         }
         public void SetStrokeColor(SolidColorBrush color)
         {
