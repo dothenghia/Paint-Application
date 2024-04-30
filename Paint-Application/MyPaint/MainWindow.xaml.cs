@@ -368,6 +368,9 @@ namespace MyPaint
             }
         }
         // ==================== Functional Bar Handlers ====================
+
+
+        // --- Select Tool "Select Area"
         private void CopySelectedAreaToClipboard()
         {
             double left;
@@ -411,8 +414,6 @@ namespace MyPaint
 
             Clipboard.SetImage(renderTargetBitmap);
         }
-
-        // --- Select Tool "Select Area"
         private void SelectButton_Click(object sender, RoutedEventArgs e)
         {
             if (choice == myMode.select.ToString())
