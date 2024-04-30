@@ -5,46 +5,20 @@ using System.Windows.Shapes;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace MyDownArrow
+namespace DownArrow
 {
     public class MyDownArrow : IShape
     {
         // ==================== Attributes ====================
         public string Name => "DownArrow"; // Name of the shape
         public string Icon => "Assets/down-arrow.png"; // Path to the icon
-        private Point startPoint; // Start point of the shape
-        private Point endPoint; // End point of the shape
+        public double Thickness { get; set; } = 1;
+        public DoubleCollection StrokeDash { get; set; } = new DoubleCollection();
+        public SolidColorBrush Brush { get; set; } = Brushes.Black;
+        public Point startPoint { get; set; }
+        public Point endPoint { get; set; }
 
-        private SolidColorBrush strokeColor = Brushes.Black; // Stroke color
-        private SolidColorBrush fillColor = Brushes.White; // Fil color
-        private double strokeThickness = 3; // Stroke thickness
-        private DoubleCollection strokeDashArray = new DoubleCollection(); // Stroke dash array
-
-        // ==================== Methods ====================
-        public void SetStartPoint(Point point)
-        {
-            startPoint = point;
-        }
-        public void SetEndPoint(Point point)
-        {
-            endPoint = point;
-        }
-        public void SetFillColor(SolidColorBrush color)
-        {
-            fillColor = color;
-        }
-        public void SetStrokeColor(SolidColorBrush color)
-        {
-            strokeColor = color;
-        }
-        public void SetStrokeThickness(double thickness)
-        {
-            strokeThickness = thickness;
-        }
-        public void SetStrokeDashArray(DoubleCollection dashArray)
-        {
-            strokeDashArray = dashArray;
-        }
+        public SolidColorBrush fillColor { get; set; } = Brushes.Transparent; // Fil color
 
         // Clone the object
         public object Clone()
@@ -83,15 +57,15 @@ namespace MyDownArrow
             Polygon downArrowPolygon = new Polygon()
             {
                 Points = new PointCollection(points),
-                Stroke = strokeColor,
-                StrokeThickness = strokeThickness,
-                StrokeDashArray = strokeDashArray,
-                Fill = fillColor
+                Fill = fillColor,
+                Stroke = Brush,
+                StrokeThickness = Thickness,
+                StrokeDashArray = StrokeDash
+
             };
 
             frameCanvas.Children.Add(downArrowPolygon);
             return frameCanvas;
         }
     }
-
 }

@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,7 +13,21 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
 using MyShapes;
+using DownArrow;
+using Ellipse_;
+using LeftArrow;
+using Line_;
+using Rectangle_;
+using RightArrow;
+using Star;
+using Triangle;
+using UpArrow;
+using ICommand;
+using MyUndoCommand;
+using MyRevisionControl;
+using MyToolbarCommand;
 
 namespace MyPaint
 {
@@ -23,9 +38,17 @@ namespace MyPaint
         public Point endPoint; // End point of the shape
         Dictionary<string, DoubleCollection> dashCollections = new Dictionary<string, DoubleCollection>();
 
+        private Stack<IShape> _buffer = new Stack<IShape>();// Danh sách các hình vẽ được pop ra sau khi undo
         List<IShape> prototypeShapes = new List<IShape>(); // Danh sách các hình vẽ có thể chọn từ giao diện (Sản phẩm mẫu)
         List<IShape> drawnShapes = new List<IShape>(); // Danh sách các hình đã vẽ trên canvas
         IShape currentShape; // Current Shape  - Hình vẽ hiện tại đang vẽ
+        bool isSelectingArea = false;
+        string choice;
+        enum myMode
+        {
+            draw,
+            select
+        };
 
         int selectingIndex = -1;
         bool isDrawing = false; // Is Drawing - Tránh trường hợp xóa hình vẽ khi đang vẽ
@@ -33,9 +56,11 @@ namespace MyPaint
         bool isSelecting = false; // Is Selecting - Tránh trường họp MouseDown vào hình đã chọn
         Point dragStartPoint; // Lưu vị trí bắt đầu khi kéo
 
+        RevisionControl revisionControl = new RevisionControl();
 
         // ==================== Methods ====================
-        public MainWindow() {
+        public MainWindow()
+        {
             InitializeComponent();
             dashCollections["Solid"] = null;
             dashCollections["Dash"] = new DoubleCollection { 4, 4 };
@@ -49,12 +74,15 @@ namespace MyPaint
             string folder = AppDomain.CurrentDomain.BaseDirectory; // Single configuration
             var fis = new DirectoryInfo(folder).GetFiles("*.dll");
 
-            foreach (var fi in fis) {
+            foreach (var fi in fis)
+            {
                 var assembly = Assembly.LoadFrom(fi.FullName); // Get all types in the assembly (in the DLL)
                 var types = assembly.GetTypes();
 
-                foreach (var type in types) {
-                    if ((type.IsClass) && (typeof(IShape).IsAssignableFrom(type))) {
+                foreach (var type in types)
+                {
+                    if ((type.IsClass) && (typeof(IShape).IsAssignableFrom(type)))
+                    {
                         prototypeShapes.Add((IShape)Activator.CreateInstance(type)!); // Add the shape to the list of prototype shapes
                     }
                 }
@@ -67,7 +95,8 @@ namespace MyPaint
 
         private void RenderShapeButtons(List<IShape> _prototypeShapes)
         {
-            foreach (var shape in _prototypeShapes) {
+            foreach (var shape in _prototypeShapes)
+            {
                 var button = new Button();
                 button.Tag = shape;
                 Style style = this.FindResource("FunctionalBarButtonImage_Style") as Style;
@@ -81,56 +110,375 @@ namespace MyPaint
 
 
         // ==================== Tool Bar Handlers ====================
-        private void OpenButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Open File"); }
-        private void SaveButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Save File"); }
-        private void UndoButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Undo"); }
-        private void RedoButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Redo"); }
+        private void OpenButton_Click(object sender, RoutedEventArgs e)
+        {
+            Main_Canvas.Children.Clear();
+            drawnShapes.Clear();
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.InitialDirectory = @"C:\";
+            openFileDialog.RestoreDirectory = true;
+            openFileDialog.DefaultExt = "dat";        // Default file extension
+            openFileDialog.Filter = "dat files (*.dat)|*.dat"; // Filter for .dat files
+            openFileDialog.FilterIndex = 1;
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                importCanvas(openFileDialog.FileName);
+            }
+        }
+        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.RestoreDirectory = true;
+            saveFileDialog.InitialDirectory = @"C:\";
+            saveFileDialog.DefaultExt = "dat"; // Default file extension
+            saveFileDialog.Filter = "dat files (*.dat)|*.dat"; // Filter for .dat files
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                string fileName = saveFileDialog.FileName;
+                exportCanvas(fileName);
+            }
+        }
+        public void exportCanvas(string fileName)
+        {
+            try
+            {
+                using (FileStream fileStream = new FileStream(fileName, FileMode.Create))
+                using (BinaryWriter writer = new BinaryWriter(fileStream))
+                {
+                    writer.Write(drawnShapes.Count);
+                    foreach (var shape in drawnShapes)
+                    {
+                        WriteShapeData(writer, shape);
+                    }
+                }
+                MessageBox.Show("Shapes exported successfully.", "Export Shapes", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error exporting shapes: " + ex.Message, "Export Shapes", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        // Method to write shape data
+        private void WriteShapeData(BinaryWriter writer, IShape shape)
+        {
+            writer.Write(shape.Name);
+            writer.Write(shape.Thickness);
+
+            // Write DoubleCollection
+            writer.Write(shape.StrokeDash.Count);
+            foreach (double value in shape.StrokeDash)
+            {
+                writer.Write(value);
+            }
+
+            // Write SolidColorBrush color
+            Color color = shape.Brush.Color;
+            writer.Write(color.A);
+            writer.Write(color.R);
+            writer.Write(color.G);
+            writer.Write(color.B);
+
+            Color background = shape.fillColor.Color;
+            writer.Write(background.A);
+            writer.Write(background.R);
+            writer.Write(background.G);
+            writer.Write(background.B);
+
+            writer.Write(shape.startPoint.X);
+            writer.Write(shape.startPoint.Y);
+            writer.Write(shape.endPoint.X);
+            writer.Write(shape.endPoint.Y);
+        }
+        public void importCanvas(string fileName)
+        {
+            try
+            {
+                using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+                {
+                    using (BinaryReader reader = new BinaryReader(fs))
+                    {
+                        // Read shape data
+                        int numberofShape = reader.ReadInt32();
+                        for (int i = 0; i < numberofShape; i++)
+                        {
+                            string name = reader.ReadString();
+                            double thickness = reader.ReadDouble();
+                            int strokeDashCount = reader.ReadInt32();
+                            DoubleCollection strokeDash = new DoubleCollection();
+                            for (int j = 0; j < strokeDashCount; j++)
+                            {
+                                strokeDash.Add(reader.ReadDouble());
+                            }
+                            byte a = reader.ReadByte();
+                            byte r = reader.ReadByte();
+                            byte g = reader.ReadByte();
+                            byte b = reader.ReadByte();
+                            SolidColorBrush brush = new SolidColorBrush(Color.FromArgb(a, r, g, b));
+                            byte ba = reader.ReadByte();
+                            byte br = reader.ReadByte();
+                            byte bg = reader.ReadByte();
+                            byte bb = reader.ReadByte();
+                            SolidColorBrush background = new SolidColorBrush(Color.FromArgb(ba, br, bg, bb));
+                            Point startPoint = new Point(reader.ReadDouble(), reader.ReadDouble());
+                            Point endPoint = new Point(reader.ReadDouble(), reader.ReadDouble());
+
+                            IShape shape;
+                            // Create an instance of IShape using the read data
+                            switch (name)
+                            {
+                                case "DownArrow":
+                                    MyDownArrow myDownArrow = new MyDownArrow();
+                                    myDownArrow.Thickness = thickness;
+                                    myDownArrow.startPoint = startPoint;
+                                    myDownArrow.endPoint = endPoint;
+                                    myDownArrow.Brush = brush;
+                                    myDownArrow.fillColor = background;
+                                    myDownArrow.StrokeDash = strokeDash;
+                                    shape = (IShape)myDownArrow;
+                                    drawnShapes.Add(shape);
+                                    break;
+                                case "Ellipse":
+                                    MyEllipse myEllipse = new MyEllipse();
+                                    myEllipse.Thickness = thickness;
+                                    myEllipse.startPoint = startPoint;
+                                    myEllipse.endPoint = endPoint;
+                                    myEllipse.Brush = brush;
+                                    myEllipse.fillColor = background;
+                                    myEllipse.StrokeDash = strokeDash;
+                                    shape = (IShape)myEllipse;
+                                    drawnShapes.Add(shape);
+                                    break;
+                                case "LeftArrow":
+                                    MyLeftArrow myLeftArrow = new MyLeftArrow();
+                                    myLeftArrow.Thickness = thickness;
+                                    myLeftArrow.startPoint = startPoint;
+                                    myLeftArrow.endPoint = endPoint;
+                                    myLeftArrow.Brush = brush;
+                                    myLeftArrow.StrokeDash = strokeDash;
+                                    myLeftArrow.fillColor = background;
+                                    shape = (IShape)myLeftArrow;
+                                    drawnShapes.Add(shape);
+                                    break;
+                                case "Line":
+                                    MyLine myLine = new MyLine();
+                                    myLine.Thickness = thickness;
+                                    myLine.startPoint = startPoint;
+                                    myLine.endPoint = endPoint;
+                                    myLine.Brush = brush;
+                                    myLine.StrokeDash = strokeDash;
+                                    myLine.fillColor = background;
+                                    shape = (IShape)myLine;
+                                    drawnShapes.Add(shape);
+                                    break;
+                                case "Rectangle":
+                                    MyRectangle myRectangle = new MyRectangle();
+                                    myRectangle.Thickness = thickness;
+                                    myRectangle.startPoint = startPoint;
+                                    myRectangle.endPoint = endPoint;
+                                    myRectangle.Brush = brush;
+                                    myRectangle.StrokeDash = strokeDash;
+                                    myRectangle.fillColor = background;
+                                    shape = (IShape)myRectangle;
+                                    drawnShapes.Add(shape);
+                                    break;
+                                case "RightArrow":
+                                    MyRightArrow myRightArrow = new MyRightArrow();
+                                    myRightArrow.Thickness = thickness;
+                                    myRightArrow.startPoint = startPoint;
+                                    myRightArrow.endPoint = endPoint;
+                                    myRightArrow.Brush = brush;
+                                    myRightArrow.StrokeDash = strokeDash;
+                                    myRightArrow.fillColor = background;
+                                    shape = (IShape)myRightArrow;
+                                    drawnShapes.Add(shape);
+                                    break;
+                                case "Star":
+                                    MyStar myStar = new MyStar();
+                                    myStar.Thickness = thickness;
+                                    myStar.startPoint = startPoint;
+                                    myStar.endPoint = endPoint;
+                                    myStar.Brush = brush;
+                                    myStar.StrokeDash = strokeDash;
+                                    myStar.fillColor = background;
+                                    shape = (IShape)myStar;
+                                    drawnShapes.Add(shape);
+                                    break;
+                                case "Triangle":
+                                    MyTriangle myTriangle = new MyTriangle();
+                                    myTriangle.Thickness = thickness;
+                                    myTriangle.startPoint = startPoint;
+                                    myTriangle.endPoint = endPoint;
+                                    myTriangle.Brush = brush;
+                                    myTriangle.StrokeDash = strokeDash;
+                                    myTriangle.fillColor = background;
+                                    shape = (IShape)myTriangle;
+                                    drawnShapes.Add(shape);
+                                    break;
+                                case "UpArrow":
+                                    MyUpArrow myUpArrow = new MyUpArrow();
+                                    myUpArrow.Thickness = thickness;
+                                    myUpArrow.startPoint = startPoint;
+                                    myUpArrow.endPoint = endPoint;
+                                    myUpArrow.Brush = brush;
+                                    myUpArrow.StrokeDash = strokeDash;
+                                    myUpArrow.fillColor = background;
+                                    shape = (IShape)myUpArrow;
+                                    drawnShapes.Add(shape);
+                                    break;
+                                default:
+                                    throw new ArgumentException("Unexpected value for name");
+                            }
+                        }
+                    }
+                }
+                RedrawCanvas();
+                MessageBox.Show("Shapes imported successfully.", "Import Shapes", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error importing shapes: " + ex.Message, "Import Shapes", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private void UndoButton_Click(object sender, RoutedEventArgs e)
+        {
+
+            Command control = new UndoCommand(revisionControl, drawnShapes, _buffer);
+            ToolBarCommand toolBarCommand = new ToolBarCommand(control);
+            toolBarCommand.Toolbar_Undo();
+            RedrawCanvas();
+        }
+        private void RedoButton_Click(object sender, RoutedEventArgs e)
+        {
+            Command control = new UndoCommand(revisionControl, drawnShapes, _buffer);
+            ToolBarCommand toolBarCommand = new ToolBarCommand(control);
+            toolBarCommand.Toolbar_Redo();
+            RedrawCanvas();
+        }
         private void ExitButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Exit"); }
-
-
+        private void RedrawCanvas()
+        {
+            Main_Canvas.Children.Clear();
+            Console.WriteLine(drawnShapes.Count);
+            foreach (var shape in drawnShapes)
+            {
+                var element = shape.Convert();
+                Main_Canvas.Children.Add(element);
+            }
+        }
         // ==================== Functional Bar Handlers ====================
+        private void CopySelectedAreaToClipboard()
+        {
+            double left;
+            double top;
+            double width;
+            double height;
+
+            // Adjust the selected area
+            left = Math.Max(0, Math.Min(startPoint.X, endPoint.X));
+            top = Math.Max(0, Math.Min(startPoint.Y, endPoint.Y));
+            width = Math.Abs(endPoint.X - startPoint.X);
+            height = Math.Abs(endPoint.Y - startPoint.Y);
+
+            drawnShapes.RemoveAt(drawnShapes.Count - 1);
+            Main_Canvas.Children.RemoveAt(Main_Canvas.Children.Count - 1);
+
+            // Create a DrawingVisual for the selected area
+            DrawingVisual drawingVisual = new DrawingVisual();
+            using (DrawingContext drawingContext = drawingVisual.RenderOpen())
+            {
+                // Draw the Main_Canvas content to the DrawingContext with the selected area
+                drawingContext.PushClip(new RectangleGeometry(new Rect(0, 0, width, height)));
+                VisualBrush visualBrush = new VisualBrush(Main_Canvas)
+                {
+                    Stretch = Stretch.None,
+                    AlignmentX = AlignmentX.Left,
+                    AlignmentY = AlignmentY.Top,
+                };
+                drawingContext.DrawRectangle(new VisualBrush(Main_Canvas), null, new Rect(-left, -top, Main_Canvas.ActualWidth, Main_Canvas.ActualHeight));
+            }
+
+            // Render the DrawingVisual to a RenderTargetBitmap
+            RenderTargetBitmap renderTargetBitmap = new RenderTargetBitmap(
+                (int)width,
+                (int)height,
+                96,
+                96,
+                PixelFormats.Pbgra32);
+
+            renderTargetBitmap.Render(drawingVisual);
+
+            Clipboard.SetImage(renderTargetBitmap);
+        }
+
         // --- Select Tool "Select Area"
-        private void SelectButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Select"); }
+        private void SelectButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (choice == myMode.select.ToString())
+            {
+                CopySelectedAreaToClipboard();
+                choice = "";
+                TextBlock selectTextBlock = (TextBlock)FindName("SelectTB");
+                if (selectTextBlock != null)
+                {
+                    selectTextBlock.Text = "Select";
+                }
+            }
+            else
+            {
+                choice = myMode.select.ToString();
+                MyRectangle rect = new MyRectangle();
+                currentShape = rect;
+                TextBlock selectTextBlock = (TextBlock)FindName("SelectTB");
+                if (selectTextBlock != null)
+                {
+                    selectTextBlock.Text = "Copy to Clipboard";
+                }
+            }
+        }
 
         // --- Select Shape Button
         private void ShapeButton_Click(object sender, RoutedEventArgs e)
         {
+            choice = myMode.draw.ToString();
             IShape item = (IShape)(sender as Button)!.Tag;
             currentShape = item;
         }
 
         // --- Select Color Stroke & Fill
-        private void StrokeColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e) 
+        private void StrokeColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
             SolidColorBrush color = new SolidColorBrush(e.NewValue.Value);
-            foreach (IShape shape in prototypeShapes) { shape.SetStrokeColor(color); }
+            foreach (IShape shape in prototypeShapes) { shape.Brush = color; }
         }
         private void FillColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
             SolidColorBrush color = new SolidColorBrush(e.NewValue.Value);
-            foreach (IShape shape in prototypeShapes) { shape.SetFillColor(color); }
+            foreach (IShape shape in prototypeShapes) { shape.fillColor = color; }
         }
         // --- Select Stroke Thickness
         private void StrokeThicknessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             StrokeThickness_TextBlock.Text = Math.Ceiling(e.NewValue).ToString();
-            foreach (IShape shape in prototypeShapes) { shape.SetStrokeThickness(e.NewValue); }
+            foreach (IShape shape in prototypeShapes) { shape.Thickness = e.NewValue; }
         }
         // --- Select Stroke Dash
         private void StrokeDashComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ComboBoxItem selectedItem = (ComboBoxItem)StrokeDash_ComboBox.SelectedItem;
             string selectedTag = selectedItem.Tag.ToString();
-            
-            foreach (IShape shape in prototypeShapes) {
-                if (selectedTag == "Solid") { shape.SetStrokeDashArray(null); }
-                else { shape.SetStrokeDashArray(dashCollections[selectedTag]); }
+
+            foreach (IShape shape in prototypeShapes)
+            {
+                if (selectedTag == "Solid") { shape.StrokeDash = null; }
+                else { shape.StrokeDash = dashCollections[selectedTag]; }
             }
         }
 
 
-        private void LayersButton_Click(object sender, RoutedEventArgs e) 
-        { 
+        private void LayersButton_Click(object sender, RoutedEventArgs e)
+        {
             foreach (IShape shape in drawnShapes)
             {
                 Canvas shapeCanvas = shape.Convert();
@@ -150,9 +498,10 @@ namespace MyPaint
             if (isSelecting == false)
             {
                 startPoint = e.GetPosition(Main_Canvas);
-                currentShape.SetStartPoint(startPoint);
+                currentShape.startPoint = startPoint;
                 isDrawing = false;
                 isDrawn = false;
+                isSelectingArea = false;
             }
         }
 
@@ -172,11 +521,19 @@ namespace MyPaint
                     endPoint.Y = startPoint.Y + edge * Math.Sign(endPoint.Y - startPoint.Y);
                 }
 
-                currentShape.SetEndPoint(endPoint);
+                currentShape.endPoint = endPoint;
 
                 // Remove the last shape (preview shape)
-                if (isDrawing == true) { Main_Canvas.Children.RemoveAt(Main_Canvas.Children.Count - 1); }
-
+                if (isDrawing == true || isSelectingArea == true)
+                {
+                    Main_Canvas.Children.RemoveAt(Main_Canvas.Children.Count - 1);
+                    drawnShapes.RemoveAt(drawnShapes.Count - 1);
+                }
+                drawnShapes.Add((IShape)currentShape.Clone());
+                if (_buffer.Count > 0)
+                {
+                    _buffer.Clear();
+                }
                 // Then re-draw it
                 Canvas shapeCanvas = currentShape.Convert();
                 shapeCanvas.PreviewMouseDown += ShapeCanvas_PreviewMouseDown;
@@ -184,7 +541,17 @@ namespace MyPaint
                 shapeCanvas.PreviewMouseUp += ShapeCanvas_PreviewMouseUp;
 
                 Main_Canvas.Children.Add(shapeCanvas);
-                isDrawing = true;
+                if (choice == myMode.select.ToString())
+                {
+                    isSelectingArea = true;
+                    currentShape.StrokeDash = dashCollections["Dot"];
+                    currentShape.Thickness = 3;
+                    currentShape.fillColor = new SolidColorBrush(Colors.Transparent);
+                }
+                else if (choice == myMode.draw.ToString())
+                {
+                    isDrawing = true;
+                }
             }
         }
 
@@ -193,7 +560,6 @@ namespace MyPaint
             if (isDrawing == true && isDrawn == false)
             {
                 IShape clone = (IShape)currentShape.Clone();
-                drawnShapes.Add(clone);
                 isDrawn = true;
             }
         }
@@ -244,17 +610,17 @@ namespace MyPaint
 
         private void ShapeCanvas_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (isSelecting == true) {
+            if (isSelecting == true)
+            {
                 if (sender is Canvas shapeCanvas)
                 {
-                    drawnShapes[selectingIndex].SetStartPoint(new Point(Canvas.GetLeft(shapeCanvas), Canvas.GetTop(shapeCanvas)));
-                    drawnShapes[selectingIndex].SetEndPoint(new Point(Canvas.GetLeft(shapeCanvas) + shapeCanvas.ActualWidth, Canvas.GetTop(shapeCanvas) + shapeCanvas.ActualHeight));
+                    drawnShapes[selectingIndex].startPoint = new Point(Canvas.GetLeft(shapeCanvas), Canvas.GetTop(shapeCanvas));
+                    drawnShapes[selectingIndex].endPoint = new Point(Canvas.GetLeft(shapeCanvas) + shapeCanvas.ActualWidth, Canvas.GetTop(shapeCanvas) + shapeCanvas.ActualHeight);
                 }
             }
             else if (isDrawing == true && isDrawn == false) // For Line, Rectangle because they are hit the cursor => Do not catch the MainCanvas_MouseUp event
             {
                 IShape clone = (IShape)currentShape.Clone();
-                drawnShapes.Add(clone);
                 isDrawn = true;
             }
         }
