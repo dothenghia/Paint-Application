@@ -21,17 +21,18 @@ namespace MyPaint
         // ==================== Attributes ====================
         public Point startPoint; // Start point of the shape
         public Point endPoint; // End point of the shape
-        Dictionary<string, DoubleCollection> dashCollections = new Dictionary<string, DoubleCollection>();
+        Dictionary<string, DoubleCollection> dashCollections = new Dictionary<string, DoubleCollection>(); // List of dash styles
 
-        List<IShape> prototypeShapes = new List<IShape>(); // Danh sách các hình vẽ có thể chọn từ giao diện (Sản phẩm mẫu)
-        List<IShape> drawnShapes = new List<IShape>(); // Danh sách các hình đã vẽ trên canvas
-        IShape currentShape; // Current Shape  - Hình vẽ hiện tại đang vẽ
+        List<IShape> prototypeShapes = new List<IShape>(); // List of prototype shapes
+        List<IShape> drawnShapes = new List<IShape>(); // List of drawn shapes in the MainCanvas
+        IShape currentShape; // Current selected shape to draw
 
-        int selectingIndex = -1;
-        bool isDrawing = false; // Is Drawing - Tránh trường hợp xóa hình vẽ khi đang vẽ
-        bool isDrawn = false;
-        bool isSelecting = false; // Is Selecting - Tránh trường họp MouseDown vào hình đã chọn
-        Point dragStartPoint; // Lưu vị trí bắt đầu khi kéo
+        bool isDrawing = false; // Is Drawing - Used to remove the last shape (preview shape) when drawing
+        bool isDrawn = false; // Is Drawn - Used to check if the shape is drawn or not (handle MouseUp event is triggered)
+
+        int selectingIndex = -1; // Index of the selecting single shape
+        bool isSelecting = false; // Is Selecting - Used to check if the shape is selecting or not (avoid drawing new shape when selecting shape)
+        Point dragStartPoint; // Start point when dragging the shape
 
 
         // ==================== Methods ====================
@@ -105,17 +106,20 @@ namespace MyPaint
             SolidColorBrush color = new SolidColorBrush(e.NewValue.Value);
             foreach (IShape shape in prototypeShapes) { shape.SetStrokeColor(color); }
         }
+        
         private void FillColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
         {
             SolidColorBrush color = new SolidColorBrush(e.NewValue.Value);
             foreach (IShape shape in prototypeShapes) { shape.SetFillColor(color); }
         }
+
         // --- Select Stroke Thickness
         private void StrokeThicknessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             StrokeThickness_TextBlock.Text = Math.Ceiling(e.NewValue).ToString();
             foreach (IShape shape in prototypeShapes) { shape.SetStrokeThickness(e.NewValue); }
         }
+
         // --- Select Stroke Dash
         private void StrokeDashComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -128,23 +132,40 @@ namespace MyPaint
             }
         }
 
-
+        // --- Layers Button => TEST LOAD FILE
+        // REDRAW ALL SHAPES FROM THE LIST
         private void LayersButton_Click(object sender, RoutedEventArgs e) 
         { 
             foreach (IShape shape in drawnShapes)
             {
                 Canvas shapeCanvas = shape.Convert();
+                shapeCanvas.PreviewMouseDown += ShapeCanvas_PreviewMouseDown;
+                shapeCanvas.PreviewMouseMove += ShapeCanvas_PreviewMouseMove;
+                shapeCanvas.PreviewMouseUp += ShapeCanvas_PreviewMouseUp;
                 Main_Canvas.Children.Add(shapeCanvas);
             }
         }
+
+        // --- Erase Button => TEST CLEAR ALL SHAPES
         private void EraseButton_Click(object sender, RoutedEventArgs e)
         {
             Main_Canvas.Children.Clear();
+            // drawnShapes.Clear();
         }
 
 
 
         // ==================== Main Canvas Handlers ====================
+        
+        // MainCanvas_PreviewMouseDown will be triggered before ShapeCanvas_PreviewMouseDown
+        // Used to remove the selecting shape when clicking outside the shape
+        private void MainCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            isSelecting = false;
+            RemoveSelectingShape();
+            selectingIndex = -1;
+        }
+
         private void MainCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (isSelecting == false)
@@ -198,22 +219,15 @@ namespace MyPaint
             }
         }
 
-        // Cái này sẽ gọi trước ShapeCanvas_PreviewMouseDown
-        // Dùng để deselect shape khi click ra ngoài shape
-        private void MainCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            isSelecting = false;
-            RemoveSelectingShape();
-            selectingIndex = -1;
-        }
 
         private void ShapeCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is Canvas shapeCanvas)
             {
                 isSelecting = true;
-                // RemoveSelectingShape();
+
                 DrawSelectingShape(shapeCanvas);
+                
                 selectingIndex = Main_Canvas.Children.IndexOf(shapeCanvas);
 
                 shapeCanvas.Cursor = Cursors.SizeAll;
@@ -232,11 +246,11 @@ namespace MyPaint
                     double offsetX = currentPoint.X - dragStartPoint.X;
                     double offsetY = currentPoint.Y - dragStartPoint.Y;
 
-                    // Di chuyển Canvas
+                    // Move the shape
                     Canvas.SetLeft(shapeCanvas, Canvas.GetLeft(shapeCanvas) + offsetX);
                     Canvas.SetTop(shapeCanvas, Canvas.GetTop(shapeCanvas) + offsetY);
 
-                    // Cập nhật vị trí bắt đầu cho lần di chuyển tiếp theo
+                    // Update the start and end points of the shape
                     dragStartPoint = currentPoint;
                 }
             }
@@ -251,7 +265,8 @@ namespace MyPaint
                     drawnShapes[selectingIndex].SetEndPoint(new Point(Canvas.GetLeft(shapeCanvas) + shapeCanvas.ActualWidth, Canvas.GetTop(shapeCanvas) + shapeCanvas.ActualHeight));
                 }
             }
-            else if (isDrawing == true && isDrawn == false) // For Line, Rectangle because they are hit the cursor => Do not catch the MainCanvas_MouseUp event
+            // For Line, Rectangle because they are hit the cursor => Do not catch the MainCanvas_MouseUp event
+            else if (isDrawing == true && isDrawn == false)
             {
                 IShape clone = (IShape)currentShape.Clone();
                 drawnShapes.Add(clone);
@@ -289,6 +304,7 @@ namespace MyPaint
                 Fill = Brushes.Transparent,
                 Name = "Selecting_Rectangle"
             };
+            
             canvas.Children.Add(selectingRectangle);
         }
 
