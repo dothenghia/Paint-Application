@@ -27,9 +27,11 @@ namespace MyPaint
         List<IShape> drawnShapes = new List<IShape>(); // Danh sách các hình đã vẽ trên canvas
         IShape currentShape; // Current Shape  - Hình vẽ hiện tại đang vẽ
 
-        bool isDrawing = false; // Is Drawing - Tránh trường hợp xóa hình vẽ khi đang vẽ
         int selectingIndex = -1;
+        bool isDrawing = false; // Is Drawing - Tránh trường hợp xóa hình vẽ khi đang vẽ
+        bool isDrawn = false;
         bool isSelecting = false; // Is Selecting - Tránh trường họp MouseDown vào hình đã chọn
+        Point dragStartPoint; // Lưu vị trí bắt đầu khi kéo
 
 
         // ==================== Methods ====================
@@ -78,14 +80,12 @@ namespace MyPaint
         }
 
 
-
         // ==================== Tool Bar Handlers ====================
         private void OpenButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Open File"); }
         private void SaveButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Save File"); }
         private void UndoButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Undo"); }
         private void RedoButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Redo"); }
         private void ExitButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Exit"); }
-
 
 
         // ==================== Functional Bar Handlers ====================
@@ -128,9 +128,19 @@ namespace MyPaint
             }
         }
 
-        private void SizeButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Change Size"); }
-        private void StrokeButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Change Stroke"); }
-        private void LayersButton_Click(object sender, RoutedEventArgs e) { Debug.WriteLine("Layers"); }
+
+        private void LayersButton_Click(object sender, RoutedEventArgs e) 
+        { 
+            foreach (IShape shape in drawnShapes)
+            {
+                Canvas shapeCanvas = shape.Convert();
+                Main_Canvas.Children.Add(shapeCanvas);
+            }
+        }
+        private void EraseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Main_Canvas.Children.Clear();
+        }
 
 
 
@@ -139,10 +149,10 @@ namespace MyPaint
         {
             if (isSelecting == false)
             {
-                Debug.WriteLine("MainCanvas - MouseDown");
                 startPoint = e.GetPosition(Main_Canvas);
                 currentShape.SetStartPoint(startPoint);
                 isDrawing = false;
+                isDrawn = false;
             }
         }
 
@@ -169,7 +179,9 @@ namespace MyPaint
 
                 // Then re-draw it
                 Canvas shapeCanvas = currentShape.Convert();
-                shapeCanvas.PreviewMouseDown += DrawnShape_PreviewMouseDown;
+                shapeCanvas.PreviewMouseDown += ShapeCanvas_PreviewMouseDown;
+                shapeCanvas.PreviewMouseMove += ShapeCanvas_PreviewMouseMove;
+                shapeCanvas.PreviewMouseUp += ShapeCanvas_PreviewMouseUp;
 
                 Main_Canvas.Children.Add(shapeCanvas);
                 isDrawing = true;
@@ -178,25 +190,79 @@ namespace MyPaint
 
         private void MainCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (isSelecting == false)
+            if (isDrawing == true && isDrawn == false)
             {
                 IShape clone = (IShape)currentShape.Clone();
                 drawnShapes.Add(clone);
+                isDrawn = true;
             }
         }
 
-        private void DrawnShape_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        // Cái này sẽ gọi trước ShapeCanvas_PreviewMouseDown
+        // Dùng để deselect shape khi click ra ngoài shape
+        private void MainCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            isSelecting = true;
+            isSelecting = false;
+            RemoveSelectingShape();
+            selectingIndex = -1;
+        }
+
+        private void ShapeCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
             if (sender is Canvas shapeCanvas)
             {
+                isSelecting = true;
+                // RemoveSelectingShape();
                 DrawSelectingShape(shapeCanvas);
+                selectingIndex = Main_Canvas.Children.IndexOf(shapeCanvas);
+
+                shapeCanvas.Cursor = Cursors.SizeAll;
+
+                dragStartPoint = e.GetPosition(Main_Canvas);
             }
         }
 
-        private void DrawSelectingShape(Canvas canvas)
+        private void ShapeCanvas_PreviewMouseMove(object sender, MouseEventArgs e)
         {
-            // Xóa "Selecting_Rectangle" của shape có selectinIndex
+            if (isSelecting == true && e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (sender is Canvas shapeCanvas)
+                {
+                    Point currentPoint = e.GetPosition(Main_Canvas);
+                    double offsetX = currentPoint.X - dragStartPoint.X;
+                    double offsetY = currentPoint.Y - dragStartPoint.Y;
+
+                    // Di chuyển Canvas
+                    Canvas.SetLeft(shapeCanvas, Canvas.GetLeft(shapeCanvas) + offsetX);
+                    Canvas.SetTop(shapeCanvas, Canvas.GetTop(shapeCanvas) + offsetY);
+
+                    // Cập nhật vị trí bắt đầu cho lần di chuyển tiếp theo
+                    dragStartPoint = currentPoint;
+                }
+            }
+        }
+
+        private void ShapeCanvas_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (isSelecting == true) {
+                if (sender is Canvas shapeCanvas)
+                {
+                    drawnShapes[selectingIndex].SetStartPoint(new Point(Canvas.GetLeft(shapeCanvas), Canvas.GetTop(shapeCanvas)));
+                    drawnShapes[selectingIndex].SetEndPoint(new Point(Canvas.GetLeft(shapeCanvas) + shapeCanvas.ActualWidth, Canvas.GetTop(shapeCanvas) + shapeCanvas.ActualHeight));
+                }
+            }
+            else if (isDrawing == true && isDrawn == false) // For Line, Rectangle because they are hit the cursor => Do not catch the MainCanvas_MouseUp event
+            {
+                IShape clone = (IShape)currentShape.Clone();
+                drawnShapes.Add(clone);
+                isDrawn = true;
+            }
+        }
+
+
+
+        private void RemoveSelectingShape()
+        {
             if (selectingIndex != -1)
             {
                 Canvas selectingCanvas = (Canvas)Main_Canvas.Children[selectingIndex];
@@ -209,9 +275,11 @@ namespace MyPaint
                     }
                 }
             }
+        }
 
-            // Tạo một Rectangle để vẽ viền cho hình đã chọn
-            Rectangle borderRectangle = new Rectangle
+        private void DrawSelectingShape(Canvas canvas)
+        {
+            Rectangle selectingRectangle = new Rectangle
             {
                 Width = canvas.ActualWidth,
                 Height = canvas.ActualHeight,
@@ -221,9 +289,7 @@ namespace MyPaint
                 Fill = Brushes.Transparent,
                 Name = "Selecting_Rectangle"
             };
-
-            canvas.Children.Add(borderRectangle);
-            selectingIndex = Main_Canvas.Children.IndexOf(canvas);
+            canvas.Children.Add(selectingRectangle);
         }
 
     }

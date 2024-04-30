@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:MyPaint"
         mc:Ignorable="d"
         Title="Pain"
-        Height="560" Width="800"
+        Height="660" Width="1200"
         WindowStartupLocation="CenterScreen"
         Loaded="Window_Loaded">
 
@@ -74,6 +74,7 @@
         <!-- ====== Functional Bar ====== -->
         <Grid DockPanel.Dock="Top">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
@@ -191,6 +192,16 @@
                 </StackPanel>
             </Border>
 
+            <Border Grid.Column="6" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
+                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                    <!-- Layers Button -->
+                    <Button Click="EraseButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
+                        <Image Source="Assets/layer.png"/>
+                    </Button>
+                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Layers</TextBlock>
+                </StackPanel>
+            </Border>
+
         </Grid>
 
 
@@ -198,7 +209,8 @@
         <Canvas Name="Main_Canvas" Background="White" 
                 MouseDown="MainCanvas_MouseDown"
                 MouseUp="MainCanvas_MouseUp"
-                MouseMove="MainCanvas_MouseMove"/>
+                MouseMove="MainCanvas_MouseMove"
+                PreviewMouseDown="MainCanvas_PreviewMouseDown"/>
 
 
     </DockPanel>
