@@ -6,13 +6,16 @@
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:MyPaint"
         mc:Ignorable="d"
-        Title="Pain"
+        Title="My Paint"
         Height="660" Width="1200"
         WindowStartupLocation="CenterScreen"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        Icon="/Assets/logo.png">
 
     <!-- ==================== Define Window Resources ==================== -->
     <Window.Resources>
+        <local:NumericValueConverter x:Key="NumericConverter" />
+
         <!-- Style for Toolbar buttons -->
         <Style x:Key="ToobarButton_Style" TargetType="Button">
             <Setter Property="Padding" Value="8, 4" />
@@ -49,7 +52,7 @@
             <Setter Property="Background" Value="Transparent" />
             <Setter Property="BorderThickness" Value="0" />
         </Style>
-       
+
     </Window.Resources>
 
 
@@ -131,8 +134,9 @@
                     <!-- Stroke Thickness Slider -->
                     <TextBlock x:Name="StrokeThickness_TextBlock" Style="{StaticResource FunctionalBarSectionTitle_Style}">3</TextBlock>
 
-                    <Slider Width="100" Margin="4, 0, 4, 8"
+                    <Slider Width="120" Margin="4, 0, 4, 8"
                             Minimum="1" Maximum="10" Value="3"
+                            TickFrequency="1" TickPlacement="BottomRight" IsSnapToTickEnabled="True"
                             ValueChanged="StrokeThicknessSlider_ValueChanged"/>
 
                     <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke Size</TextBlock>
@@ -182,23 +186,26 @@
                 </StackPanel>
             </Border>
 
-            <Border Grid.Column="5" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
+            <Border Grid.Column="5" Style="{StaticResource FunctionalBarSectionBorder_Style}">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                    <!-- Layers Button -->
-                    <Button Click="LayersButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
-                        <Image Source="Assets/layer.png"/>
+                    <!-- Clean Button -->
+                    <Button Click="CleanButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
+                        <Image Source="Assets/clean.png"/>
                     </Button>
-                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Layers</TextBlock>
+                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Clean</TextBlock>
                 </StackPanel>
             </Border>
 
-            <Border Grid.Column="6" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
+            <Border x:Name="RotateShape_Border" Visibility="Hidden" Grid.Column="6" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                    <!-- Layers Button -->
-                    <Button Click="EraseButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
-                        <Image Source="Assets/layer.png"/>
-                    </Button>
-                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Layers</TextBlock>
+                    <!-- Rotate Shape -->
+                    <TextBox Text="{Binding ElementName=Angle_Slider, Path=Value, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumericConverter}}" TextAlignment="Center" Width="40" />
+                    <Slider Width="150" Margin="4, 4, 4, 2" Name="Angle_Slider"
+                            Minimum="-179" Maximum="180" Value="0"
+                            TickFrequency="1" TickPlacement="None" IsSnapToTickEnabled="True"
+                            ValueChanged="AngleSlider_ValueChanged"/>
+
+                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Rotate</TextBlock>
                 </StackPanel>
             </Border>
 

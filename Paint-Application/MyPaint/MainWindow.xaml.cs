@@ -28,9 +28,28 @@ using ICommand;
 using MyUndoCommand;
 using MyRevisionControl;
 using MyToolbarCommand;
+using System.Globalization;
 
 namespace MyPaint
 {
+    public class NumericValueConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (string.IsNullOrWhiteSpace(value?.ToString()) || !double.TryParse(value.ToString(), out double result))
+            {
+                return 0; // Return 0 if the value is null, empty, or not a number
+            }
+
+            return result;
+        }
+    }
+
     public partial class MainWindow : Window
     {
         // ==================== Attributes ====================
@@ -484,26 +503,29 @@ namespace MyPaint
             }
         }
 
-
-        private void LayersButton_Click(object sender, RoutedEventArgs e) 
-        { 
-            foreach (IShape shape in drawnShapes)
-            {
-                Canvas shapeCanvas = shape.Convert();
-                shapeCanvas.PreviewMouseDown += ShapeCanvas_PreviewMouseDown;
-                shapeCanvas.PreviewMouseMove += ShapeCanvas_PreviewMouseMove;
-                shapeCanvas.PreviewMouseUp += ShapeCanvas_PreviewMouseUp;
-                Main_Canvas.Children.Add(shapeCanvas);
-            }
-        }
-
-        // --- Erase Button => TEST CLEAR ALL SHAPES
-        private void EraseButton_Click(object sender, RoutedEventArgs e)
+        // --- Clean Button
+        private void CleanButton_Click(object sender, RoutedEventArgs e)
         {
             Main_Canvas.Children.Clear();
-            // drawnShapes.Clear();
+            drawnShapes.Clear();
         }
 
+        // --- Angle Slider
+        private void AngleSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (selectingIndex != -1)
+            {
+                double angle = Angle_Slider.Value;
+
+                RotateTransform rotateTransform = new RotateTransform(angle);
+
+                Canvas selectingCanvas = (Canvas)Main_Canvas.Children[selectingIndex];
+
+                selectingCanvas.RenderTransformOrigin = new Point(0.5, 0.5);
+
+                selectingCanvas.RenderTransform = rotateTransform;
+            }
+        }
 
 
         // ==================== Main Canvas Handlers ====================
@@ -515,6 +537,8 @@ namespace MyPaint
             isSelecting = false;
             RemoveSelectingShape();
             selectingIndex = -1;
+
+            RotateShape_Border.Visibility = Visibility.Hidden;
         }
 
         private void MainCanvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -600,6 +624,8 @@ namespace MyPaint
                 selectingIndex = Main_Canvas.Children.IndexOf(shapeCanvas);
 
                 dragStartPoint = e.GetPosition(Main_Canvas);
+
+                RotateShape_Border.Visibility = Visibility.Visible;
             }
         }
 
@@ -639,7 +665,6 @@ namespace MyPaint
                 isDrawn = true;
             }
         }
-
 
 
         private void RemoveSelectingShape()

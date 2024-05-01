@@ -10,6 +10,8 @@
 
   <ItemGroup>
     <None Remove="Assets\circle.png" />
+    <None Remove="Assets\clean.png" />
+    <None Remove="Assets\clipboard.png" />
     <None Remove="Assets\down-arrow.png" />
     <None Remove="Assets\ellipse.png" />
     <None Remove="Assets\exit.png" />
@@ -23,6 +25,8 @@
     <None Remove="Assets\rectangle.png" />
     <None Remove="Assets\redo.png" />
     <None Remove="Assets\right-arrow.png" />
+    <None Remove="Assets\rotate-left.png" />
+    <None Remove="Assets\rotate-right.png" />
     <None Remove="Assets\save.png" />
     <None Remove="Assets\select.png" />
     <None Remove="Assets\square.png" />
@@ -42,6 +46,12 @@
 
   <ItemGroup>
     <Content Include="Assets\circle.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\clean.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\clipboard.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\down-arrow.png">
@@ -81,6 +91,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\right-arrow.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\rotate-left.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\rotate-right.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\save.png">
