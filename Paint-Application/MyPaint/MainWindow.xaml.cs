@@ -28,6 +28,8 @@ using ICommand;
 using MyUndoCommand;
 using MyRevisionControl;
 using MyToolbarCommand;
+using MyCutCommand;
+using MyClipboardControl;
 
 namespace MyPaint
 {
@@ -40,12 +42,13 @@ namespace MyPaint
 
         private Stack<IShape> _buffer = new Stack<IShape>();// Danh sách các hình vẽ được pop ra sau khi undo
 
-        List<IShape> prototypeShapes = new List<IShape>(); // List of prototype shapes
-        List<IShape> drawnShapes = new List<IShape>(); // List of drawn shapes in the MainCanvas
-        IShape currentShape; // Current selected shape to draw
-
+        List<IShape> prototypeShapes = new List<IShape>(); // Danh sách các hình vẽ có thể chọn từ giao diện (Sản phẩm mẫu)
+        List<IShape> drawnShapes = new List<IShape>(); // Danh sách các hình đã vẽ trên canvas
+        IShape currentShape; // Current Shape  - Hình vẽ hiện tại đang vẽ
+        IShape memoryShape;
         bool isSelectingArea = false;
         string choice;
+        List<IShape> memory = new List<IShape> ();
         enum myMode
         {
             draw,
@@ -60,6 +63,7 @@ namespace MyPaint
         Point dragStartPoint; // Start point when dragging the shape
 
         RevisionControl revisionControl = new RevisionControl();
+        ClipboardControl clipboard = new ClipboardControl();
 
         // ==================== Methods ====================
         public MainWindow()
@@ -144,6 +148,35 @@ namespace MyPaint
                 exportCanvas(fileName);
             }
         }
+        private void CopyButton_Click(object sender, RoutedEventArgs e)
+        {
+            if(selectingIndex > -1)
+            {
+                CutCommand cut = new CutCommand(clipboard, drawnShapes, drawnShapes[selectingIndex], memory, true);
+                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, _buffer));
+                toolBarCommand.Toolbar_Copy();
+            }
+        }
+
+        private void CutButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (selectingIndex > -1)
+            {
+                CutCommand cut = new CutCommand(clipboard, drawnShapes, drawnShapes[selectingIndex], memory, false);
+                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, _buffer));
+                toolBarCommand.Toolbar_Cut();
+                RedrawCanvas();
+            }
+        }
+
+        private void PasteButton_Click(object sender, RoutedEventArgs e)
+        {
+            CutCommand cut = new CutCommand(clipboard, drawnShapes, memory, true);
+            ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, _buffer));
+            toolBarCommand.Toolbar_Paste();
+            RedrawCanvas();
+        }
+
         public void exportCanvas(string fileName)
         {
             try
@@ -347,7 +380,6 @@ namespace MyPaint
         }
         private void UndoButton_Click(object sender, RoutedEventArgs e)
         {
-
             Command control = new UndoCommand(revisionControl, drawnShapes, _buffer);
             ToolBarCommand toolBarCommand = new ToolBarCommand(control);
             toolBarCommand.Toolbar_Undo();
@@ -367,8 +399,12 @@ namespace MyPaint
             Console.WriteLine(drawnShapes.Count);
             foreach (var shape in drawnShapes)
             {
-                var element = shape.Convert();
-                Main_Canvas.Children.Add(element);
+                Canvas shapeCanvas = shape.Convert();
+                shapeCanvas.PreviewMouseDown += ShapeCanvas_PreviewMouseDown;
+                shapeCanvas.PreviewMouseMove += ShapeCanvas_PreviewMouseMove;
+                shapeCanvas.PreviewMouseUp += ShapeCanvas_PreviewMouseUp;
+
+                Main_Canvas.Children.Add(shapeCanvas);
             }
         }
         // ==================== Functional Bar Handlers ====================
