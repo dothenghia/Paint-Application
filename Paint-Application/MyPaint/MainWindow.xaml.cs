@@ -39,9 +39,11 @@ namespace MyPaint
         Dictionary<string, DoubleCollection> dashCollections = new Dictionary<string, DoubleCollection>(); // List of dash styles
 
         private Stack<IShape> _buffer = new Stack<IShape>();// Danh sách các hình vẽ được pop ra sau khi undo
+
         List<IShape> prototypeShapes = new List<IShape>(); // List of prototype shapes
         List<IShape> drawnShapes = new List<IShape>(); // List of drawn shapes in the MainCanvas
         IShape currentShape; // Current selected shape to draw
+
         bool isSelectingArea = false;
         string choice;
         enum myMode
@@ -92,6 +94,7 @@ namespace MyPaint
             RenderShapeButtons(prototypeShapes); // Render the shape buttons
 
             currentShape = prototypeShapes[0]; // Set the default shape
+            choice = myMode.draw.ToString();
         }
 
         private void RenderShapeButtons(List<IShape> _prototypeShapes)
@@ -596,8 +599,6 @@ namespace MyPaint
                 
                 selectingIndex = Main_Canvas.Children.IndexOf(shapeCanvas);
 
-                shapeCanvas.Cursor = Cursors.SizeAll;
-
                 dragStartPoint = e.GetPosition(Main_Canvas);
             }
         }
@@ -606,19 +607,18 @@ namespace MyPaint
         {
             if (isSelecting == true && e.LeftButton == MouseButtonState.Pressed)
             {
-                if (sender is Canvas shapeCanvas)
-                {
-                    Point currentPoint = e.GetPosition(Main_Canvas);
-                    double offsetX = currentPoint.X - dragStartPoint.X;
-                    double offsetY = currentPoint.Y - dragStartPoint.Y;
+                Canvas shapeCanvas = Main_Canvas.Children[selectingIndex] as Canvas;
+                shapeCanvas.Cursor = Cursors.SizeAll;
+                Point currentPoint = e.GetPosition(Main_Canvas);
+                double offsetX = currentPoint.X - dragStartPoint.X;
+                double offsetY = currentPoint.Y - dragStartPoint.Y;
 
-                    // Move the shape
-                    Canvas.SetLeft(shapeCanvas, Canvas.GetLeft(shapeCanvas) + offsetX);
-                    Canvas.SetTop(shapeCanvas, Canvas.GetTop(shapeCanvas) + offsetY);
+                // Move the shape
+                Canvas.SetLeft(shapeCanvas, Canvas.GetLeft(shapeCanvas) + offsetX);
+                Canvas.SetTop(shapeCanvas, Canvas.GetTop(shapeCanvas) + offsetY);
 
-                    // Update the start and end points of the shape
-                    dragStartPoint = currentPoint;
-                }
+                // Update the start and end points of the shape
+                dragStartPoint = currentPoint;
             }
         }
 

@@ -12,7 +12,7 @@ namespace LeftArrow
         // ==================== Attributes ====================
         public string Name => "LeftArrow"; // Name of the shape
         public string Icon => "Assets/left-arrow.png"; // Path to the icon
-        public double Thickness { get; set; } = 1;
+        public double Thickness { get; set; } = 3;
         public DoubleCollection StrokeDash { get; set; } = new DoubleCollection();
         public SolidColorBrush Brush { get; set; } = Brushes.Black;
         public Point startPoint { get; set; }
