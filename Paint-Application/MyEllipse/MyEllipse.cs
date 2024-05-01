@@ -15,6 +15,7 @@ namespace Ellipse_
 
         public SolidColorBrush fillColor { get; set; } = Brushes.Transparent; // Fil color
         public double Thickness { get; set; } = 3;
+        public double Angle { get; set; } = 0;
         public DoubleCollection StrokeDash { get; set; } = new DoubleCollection();
         public SolidColorBrush Brush { get; set; } = Brushes.Black;
         public Point startPoint { get; set; }
@@ -53,6 +54,9 @@ namespace Ellipse_
             };
 
             frameCanvas.Children.Add(ellipse);
+            RotateTransform rotateTransform = new RotateTransform(Angle);
+            frameCanvas.RenderTransformOrigin = new Point(0.5, 0.5);
+            frameCanvas.RenderTransform = rotateTransform;
             return frameCanvas;
         }
 

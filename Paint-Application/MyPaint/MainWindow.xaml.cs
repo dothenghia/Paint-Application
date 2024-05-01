@@ -543,8 +543,22 @@ namespace MyPaint
         private void CleanButton_Click(object sender, RoutedEventArgs e)
         {
             Main_Canvas.Children.Clear();
-            drawnShapes.Clear();
+            // drawnShapes.Clear();
         }
+
+        // --- TEST Redraw Button
+        private void RedrawButton_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (IShape shape in drawnShapes)
+            {
+                Canvas shapeCanvas = shape.Convert();
+                shapeCanvas.PreviewMouseDown += ShapeCanvas_PreviewMouseDown;
+                shapeCanvas.PreviewMouseMove += ShapeCanvas_PreviewMouseMove;
+                shapeCanvas.PreviewMouseUp += ShapeCanvas_PreviewMouseUp;
+                Main_Canvas.Children.Add(shapeCanvas);
+            }
+        }
+
 
         // --- Angle Slider
         private void AngleSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -552,14 +566,14 @@ namespace MyPaint
             if (selectingIndex != -1)
             {
                 double angle = Angle_Slider.Value;
-
-                RotateTransform rotateTransform = new RotateTransform(angle);
-
                 Canvas selectingCanvas = (Canvas)Main_Canvas.Children[selectingIndex];
 
+                RotateTransform rotateTransform = new RotateTransform(angle);
                 selectingCanvas.RenderTransformOrigin = new Point(0.5, 0.5);
 
                 selectingCanvas.RenderTransform = rotateTransform;
+
+                drawnShapes[selectingIndex].Angle = angle;
             }
         }
 
@@ -662,6 +676,7 @@ namespace MyPaint
                 dragStartPoint = e.GetPosition(Main_Canvas);
 
                 RotateShape_Border.Visibility = Visibility.Visible;
+                Angle_Slider.Value = drawnShapes[selectingIndex].Angle;
             }
         }
 

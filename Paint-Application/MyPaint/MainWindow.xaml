@@ -90,6 +90,7 @@
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
             <Border Grid.Column="0" Style="{StaticResource FunctionalBarSectionBorder_Style}">
@@ -202,7 +203,17 @@
                 </StackPanel>
             </Border>
 
-            <Border x:Name="RotateShape_Border" Visibility="Hidden" Grid.Column="6" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
+            <Border Grid.Column="6" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                    <!-- TEST Button -->
+                    <Button Click="RedrawButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
+                        <Image Source="Assets/rotate-left.png"/>
+                    </Button>
+                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">TEST REDRAW</TextBlock>
+                </StackPanel>
+            </Border>
+
+            <Border x:Name="RotateShape_Border" Visibility="Hidden" Grid.Column="7" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
                 <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
                     <!-- Rotate Shape -->
                     <TextBox Text="{Binding ElementName=Angle_Slider, Path=Value, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumericConverter}}" TextAlignment="Center" Width="40" />

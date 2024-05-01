@@ -11,6 +11,7 @@ namespace MyShapes
         string Icon { get; }
         //string Text { get; set; }
         public double Thickness { get; set; }
+        public double Angle { get; set; }
         public DoubleCollection StrokeDash { get; set; }
         public SolidColorBrush Brush { get; set; }
         public Point startPoint { get; set; }

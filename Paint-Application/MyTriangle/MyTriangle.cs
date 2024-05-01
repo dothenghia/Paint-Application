@@ -15,6 +15,7 @@ namespace Triangle
 
         public SolidColorBrush fillColor { get; set; } = Brushes.Transparent; // Fil color
         public double Thickness { get; set; } = 3;
+        public double Angle { get; set; } = 0;
         public DoubleCollection StrokeDash { get; set; } = new DoubleCollection();
         public SolidColorBrush Brush { get; set; } = Brushes.Black;
         public Point startPoint { get; set; }
@@ -58,6 +59,9 @@ namespace Triangle
             triangle.StrokeDashArray = StrokeDash;
 
             frameCanvas.Children.Add(triangle);
+            RotateTransform rotateTransform = new RotateTransform(Angle);
+            frameCanvas.RenderTransformOrigin = new Point(0.5, 0.5);
+            frameCanvas.RenderTransform = rotateTransform;
             return frameCanvas;
         }
 
