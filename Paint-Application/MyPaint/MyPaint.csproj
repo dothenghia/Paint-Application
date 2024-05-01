@@ -135,6 +135,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ICommand\ICommand.csproj" />
     <ProjectReference Include="..\IShape\IShape.csproj" />
     <ProjectReference Include="..\MyDownArrow\MyDownArrow.csproj" />
     <ProjectReference Include="..\MyEllipse\MyEllipse.csproj" />
@@ -145,6 +146,9 @@
     <ProjectReference Include="..\MyStar\MyStar.csproj" />
     <ProjectReference Include="..\MyTriangle\MyTriangle.csproj" />
     <ProjectReference Include="..\MyUpArrow\MyUpArrow.csproj" />
+    <ProjectReference Include="..\RevisionControl\MyRevisionControl.csproj" />
+    <ProjectReference Include="..\ToolbarCommand\MyToolbarCommand.csproj" />
+    <ProjectReference Include="..\UndoCommand\MyUndoCommand.csproj" />
   </ItemGroup>
 
 </Project>

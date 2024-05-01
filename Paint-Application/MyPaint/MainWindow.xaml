@@ -89,7 +89,7 @@
                     <Button Click="SelectButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
                         <Image Source="Assets/select.png"/>
                     </Button>
-                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Selection</TextBlock>
+                    <TextBlock x:Name="SelectTB" Style="{StaticResource FunctionalBarSectionTitle_Style}">Selection</TextBlock>
                 </StackPanel>
             </Border>
 

@@ -17,13 +17,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyTriangle", "MyTriangle\My
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyStar", "MyStar\MyStar.csproj", "{4F93DA10-D9AB-4F26-AC48-09BD11D4AF0C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLeftArrow", "MyLeftArrow\MyLeftArrow.csproj", "{1734FC5F-05E1-4C60-ADC4-32409885B213}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyLeftArrow", "MyLeftArrow\MyLeftArrow.csproj", "{1734FC5F-05E1-4C60-ADC4-32409885B213}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyRightArrow", "MyRightArrow\MyRightArrow.csproj", "{64F60605-F5BC-41BD-B7C4-20EDC7A0722A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyRightArrow", "MyRightArrow\MyRightArrow.csproj", "{64F60605-F5BC-41BD-B7C4-20EDC7A0722A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyUpArrow", "MyUpArrow\MyUpArrow.csproj", "{F37CA410-3ACA-4C4D-94BF-3D0C0CDDD94E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyUpArrow", "MyUpArrow\MyUpArrow.csproj", "{F37CA410-3ACA-4C4D-94BF-3D0C0CDDD94E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyDownArrow", "MyDownArrow\MyDownArrow.csproj", "{1DEC7E6B-3429-415A-8F72-C9A041F0378F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyDownArrow", "MyDownArrow\MyDownArrow.csproj", "{1DEC7E6B-3429-415A-8F72-C9A041F0378F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ICommand", "ICommand\ICommand.csproj", "{25272E4F-9D14-4890-B3F8-59D4BFFCF6AA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyToolbarCommand", "ToolbarCommand\MyToolbarCommand.csproj", "{2FDE6761-DBDE-4090-AC69-FD6C0CFDB0E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyUndoCommand", "UndoCommand\MyUndoCommand.csproj", "{06E2B016-4F04-4FBE-9B52-9C7CE4974A0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyRevisionControl", "RevisionControl\MyRevisionControl.csproj", "{F245625B-1636-4F1A-B227-CFB4724A038A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,6 +83,22 @@ Global
 		{1DEC7E6B-3429-415A-8F72-C9A041F0378F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DEC7E6B-3429-415A-8F72-C9A041F0378F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1DEC7E6B-3429-415A-8F72-C9A041F0378F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25272E4F-9D14-4890-B3F8-59D4BFFCF6AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25272E4F-9D14-4890-B3F8-59D4BFFCF6AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25272E4F-9D14-4890-B3F8-59D4BFFCF6AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25272E4F-9D14-4890-B3F8-59D4BFFCF6AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FDE6761-DBDE-4090-AC69-FD6C0CFDB0E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FDE6761-DBDE-4090-AC69-FD6C0CFDB0E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FDE6761-DBDE-4090-AC69-FD6C0CFDB0E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FDE6761-DBDE-4090-AC69-FD6C0CFDB0E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06E2B016-4F04-4FBE-9B52-9C7CE4974A0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06E2B016-4F04-4FBE-9B52-9C7CE4974A0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06E2B016-4F04-4FBE-9B52-9C7CE4974A0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06E2B016-4F04-4FBE-9B52-9C7CE4974A0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F245625B-1636-4F1A-B227-CFB4724A038A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F245625B-1636-4F1A-B227-CFB4724A038A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F245625B-1636-4F1A-B227-CFB4724A038A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F245625B-1636-4F1A-B227-CFB4724A038A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

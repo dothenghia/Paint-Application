@@ -5,47 +5,19 @@ using System.Windows.Shapes;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace MyLine
+namespace Line_
 {
     public class MyLine : IShape
     {
         // ==================== Attributes ====================
         public string Name => "Line"; // Name of the shape
         public string Icon => "Assets/line.png"; // Path to the icon
-        
-        private Point startPoint; // Start point of the shape
-        private Point endPoint; // End point of the shape
-
-        private SolidColorBrush strokeColor = Brushes.Black; // Stroke color
-        private SolidColorBrush fillColor = Brushes.White; // Fil color
-        private double strokeThickness = 3; // Stroke thickness
-        private DoubleCollection? strokeDashArray = null; // Stroke dash array
-
-        // ==================== Methods ====================
-        public void SetStartPoint(Point point)
-        {
-            startPoint = point;
-        }
-        public void SetEndPoint(Point point)
-        {
-            endPoint = point;
-        }
-        public void SetFillColor(SolidColorBrush color)
-        {
-            fillColor = color;
-        }
-        public void SetStrokeColor(SolidColorBrush color)
-        {
-            strokeColor = color;
-        }
-        public void SetStrokeThickness(double thickness)
-        {
-            strokeThickness = thickness;
-        }
-        public void SetStrokeDashArray(DoubleCollection dashArray)
-        {
-            strokeDashArray = dashArray;
-        }
+        public double Thickness { get; set; } = 1;
+        public DoubleCollection StrokeDash { get; set; } = new DoubleCollection();
+        public SolidColorBrush Brush { get; set; } = Brushes.Black;
+        public Point startPoint { get; set; }
+        public Point endPoint { get; set; }
+        public SolidColorBrush fillColor { get; set; } = Brushes.Transparent; // Fil color
 
         // Clone the object
         public object Clone()
@@ -76,13 +48,15 @@ namespace MyLine
                 Y1 = startPoint.Y - canvasTop,
                 X2 = endPoint.X - canvasLeft,
                 Y2 = endPoint.Y - canvasTop,
-                Stroke = strokeColor,
-                StrokeThickness = strokeThickness,
-                StrokeDashArray = strokeDashArray
+                Fill = fillColor,
+                Stroke = Brush,
+                StrokeThickness = Thickness,
+                StrokeDashArray = StrokeDash
             };
 
             frameCanvas.Children.Add(line);
             return frameCanvas;
         }
+
     }
 }

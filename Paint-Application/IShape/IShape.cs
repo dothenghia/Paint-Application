@@ -10,15 +10,12 @@ namespace MyShapes
         string Name { get; }
         string Icon { get; }
         //string Text { get; set; }
-
-        void SetStartPoint(Point point);
-        void SetEndPoint(Point point);
-
-        void SetFillColor(SolidColorBrush color);
-        void SetStrokeColor(SolidColorBrush color);
-        void SetStrokeThickness(double thickness);
-        void SetStrokeDashArray(DoubleCollection dashArray);
-
+        public double Thickness { get; set; }
+        public DoubleCollection StrokeDash { get; set; }
+        public SolidColorBrush Brush { get; set; }
+        public Point startPoint { get; set; }
+        public Point endPoint { get; set; }
+        public SolidColorBrush fillColor { get; set; }
         Canvas Convert();
     }
 }
