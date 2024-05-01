@@ -153,6 +153,8 @@
   <ItemGroup>
     <ProjectReference Include="..\ICommand\ICommand.csproj" />
     <ProjectReference Include="..\IShape\IShape.csproj" />
+    <ProjectReference Include="..\MyClipboardControl\MyClipboardControl.csproj" />
+    <ProjectReference Include="..\MyCutCommand\MyCutCommand.csproj" />
     <ProjectReference Include="..\MyDownArrow\MyDownArrow.csproj" />
     <ProjectReference Include="..\MyEllipse\MyEllipse.csproj" />
     <ProjectReference Include="..\MyLeftArrow\MyLeftArrow.csproj" />

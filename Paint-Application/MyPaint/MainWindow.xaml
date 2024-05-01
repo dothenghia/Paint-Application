@@ -67,6 +67,12 @@
 
             <Button Click="UndoButton_Click" ToolTip="Undo file" Style="{StaticResource ToobarButton_Style}">Undo</Button>
             <Button Click="RedoButton_Click" ToolTip="Redo file" Style="{StaticResource ToobarButton_Style}">Redo</Button>
+            
+            <StackPanel Style="{StaticResource ToolbarDivider_Style}"/>
+
+            <Button Click="CopyButton_Click" ToolTip="Copy" Style="{StaticResource ToobarButton_Style}">Copy</Button>
+            <Button Click="CutButton_Click" ToolTip="Cut" Style="{StaticResource ToobarButton_Style}">Cut</Button>
+            <Button Click="PasteButton_Click" ToolTip="Past" Style="{StaticResource ToobarButton_Style}">Paste</Button>
 
             <StackPanel Style="{StaticResource ToolbarDivider_Style}"/>
 

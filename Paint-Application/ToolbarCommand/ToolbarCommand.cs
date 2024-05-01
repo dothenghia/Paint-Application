@@ -5,32 +5,29 @@ namespace MyToolbarCommand
 {
     public class ToolBarCommand
     {
-        //private readonly Command Cut;
+        private readonly Command Cut;
         private readonly Command Undo;
-
-        //public MyToolBarCommand(Command cut, Command undo)
-        //{
-
-        //    this.Cut = cut;
-        //    this.Undo = undo;
-        //}
-
+        public ToolBarCommand(Command Cut, Command Undo)
+        {
+            this.Cut = Cut;
+            this.Undo = Undo;
+        }
         public ToolBarCommand(Command Undo)
         {
             this.Undo = Undo;
         }
-        //public void Toolbar_Copy()
-        //{
-            
-        //}
-        //public void Toolbar_Cut()
-        //{
-        //    Cut.Execute();
-        //}
-        //public void Toolbar_Paste()
-        //{
-        //    Cut.Undo();
-        //}
+        public void Toolbar_Copy()
+        {
+            Cut.Execute();
+        }
+        public void Toolbar_Cut()
+        {
+            Cut.Execute();
+        }
+        public void Toolbar_Paste()
+        {
+            Cut.Undo();
+        }
 
         public void Toolbar_Undo()
         {
