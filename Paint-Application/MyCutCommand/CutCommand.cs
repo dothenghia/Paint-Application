@@ -24,7 +24,6 @@ namespace MyCutCommand
         {
             this.clipboardControl = clipboardControl;
             this.drawnShapes = drawnShapes;
-            this.selectedShape = selectedShape;
             this.memory = memory;
             this.selection = selection;
         }

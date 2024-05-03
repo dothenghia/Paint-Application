@@ -31,6 +31,9 @@ using MyToolbarCommand;
 using MyCutCommand;
 using MyClipboardControl;
 using System.Globalization;
+using Xceed.Wpf.Toolkit;
+using static System.Net.Mime.MediaTypeNames;
+using System.Drawing;
 
 namespace MyPaint
 {
@@ -55,14 +58,15 @@ namespace MyPaint
     public partial class MainWindow : Window
     {
         // ==================== Attributes ====================
-        public Point startPoint; // Start point of the shape
-        public Point endPoint; // End point of the shape
+        public System.Windows.Point startPoint; // Start point of the shape
+        public System.Windows.Point endPoint; // End point of the shape
         Dictionary<string, DoubleCollection> dashCollections = new Dictionary<string, DoubleCollection>(); // List of dash styles
 
-        private Stack<IShape> _buffer = new Stack<IShape>();// Danh sách các hình vẽ được pop ra sau khi undo
+        private Stack<IShape> forwardBuffer = new Stack<IShape>();// Danh sách các hình vẽ được pop ra sau khi undo
 
         List<IShape> prototypeShapes = new List<IShape>(); // Danh sách các hình vẽ có thể chọn từ giao diện (Sản phẩm mẫu)
         List<IShape> drawnShapes = new List<IShape>(); // Danh sách các hình đã vẽ trên canvas
+        List<IShape> backwardBuffer = new List<IShape>();
         IShape currentShape; // Current Shape  - Hình vẽ hiện tại đang vẽ
         IShape memoryShape;
         bool isSelectingArea = false;
@@ -71,7 +75,8 @@ namespace MyPaint
         enum myMode
         {
             draw,
-            select
+            select,
+            text
         };
 
         bool isDrawing = false; // Is Drawing - Used to remove the last shape (preview shape) when drawing
@@ -79,8 +84,9 @@ namespace MyPaint
 
         int selectingIndex = -1; // Index of the selecting single shape
         bool isSelecting = false; // Is Selecting - Used to check if the shape is selecting or not (avoid drawing new shape when selecting shape)
-        Point dragStartPoint; // Start point when dragging the shape
-
+        System.Windows.Point dragStartPoint; // Start point when dragging the shape
+        SolidColorBrush textColor;
+        SolidColorBrush backgroundColor;
         RevisionControl revisionControl = new RevisionControl();
         ClipboardControl clipboard = new ClipboardControl();
 
@@ -93,6 +99,8 @@ namespace MyPaint
             dashCollections["Dot"] = new DoubleCollection { 1, 2 };
             dashCollections["Dash Dot"] = new DoubleCollection { 4, 2, 1, 2 };
             dashCollections["Dash Dot Dot"] = new DoubleCollection { 4, 2, 1, 2, 1, 2 };
+            FontComboBox.SelectedIndex = 0;
+            FontSizeComboBox.SelectedIndex = 3;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -128,7 +136,7 @@ namespace MyPaint
                 button.Tag = shape;
                 Style style = this.FindResource("FunctionalBarButtonImage_Style") as Style;
                 button.Style = style;
-                var image = new Image { Source = new BitmapImage(new Uri(shape.Icon, UriKind.Relative)) };
+                var image = new System.Windows.Controls.Image { Source = new BitmapImage(new Uri(shape.Icon, UriKind.Relative)) };
                 button.Content = image;
                 button.Click += ShapeButton_Click;
                 Shapes_StackPanel.Children.Add(button);
@@ -139,7 +147,6 @@ namespace MyPaint
         // ==================== Tool Bar Handlers ====================
         private void OpenButton_Click(object sender, RoutedEventArgs e)
         {
-            Main_Canvas.Children.Clear();
             drawnShapes.Clear();
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = @"C:\";
@@ -172,7 +179,7 @@ namespace MyPaint
             if(selectingIndex > -1)
             {
                 CutCommand cut = new CutCommand(clipboard, drawnShapes, drawnShapes[selectingIndex], memory, true);
-                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, _buffer));
+                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer));
                 toolBarCommand.Toolbar_Copy();
             }
         }
@@ -182,7 +189,7 @@ namespace MyPaint
             if (selectingIndex > -1)
             {
                 CutCommand cut = new CutCommand(clipboard, drawnShapes, drawnShapes[selectingIndex], memory, false);
-                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, _buffer));
+                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer));
                 toolBarCommand.Toolbar_Cut();
                 RedrawCanvas();
             }
@@ -191,7 +198,7 @@ namespace MyPaint
         private void PasteButton_Click(object sender, RoutedEventArgs e)
         {
             CutCommand cut = new CutCommand(clipboard, drawnShapes, memory, true);
-            ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, _buffer));
+            ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer));
             toolBarCommand.Toolbar_Paste();
             RedrawCanvas();
         }
@@ -209,11 +216,11 @@ namespace MyPaint
                         WriteShapeData(writer, shape);
                     }
                 }
-                MessageBox.Show("Shapes exported successfully.", "Export Shapes", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("Shapes exported successfully.", "Export Shapes", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error exporting shapes: " + ex.Message, "Export Shapes", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("Error exporting shapes: " + ex.Message, "Export Shapes", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         // Method to write shape data
@@ -230,13 +237,13 @@ namespace MyPaint
             }
 
             // Write SolidColorBrush color
-            Color color = shape.Brush.Color;
+            System.Windows.Media.Color color = shape.Brush.Color;
             writer.Write(color.A);
             writer.Write(color.R);
             writer.Write(color.G);
             writer.Write(color.B);
 
-            Color background = shape.fillColor.Color;
+            System.Windows.Media.Color background = shape.fillColor.Color;
             writer.Write(background.A);
             writer.Write(background.R);
             writer.Write(background.G);
@@ -246,6 +253,70 @@ namespace MyPaint
             writer.Write(shape.startPoint.Y);
             writer.Write(shape.endPoint.X);
             writer.Write(shape.endPoint.Y);
+
+            writer.Write(shape.Angle);
+
+            if(shape.richTextBox != null)
+            {
+                writer.Write(true);
+
+                // Get the text content of the RichTextBox
+                TextRange textRange = new TextRange(shape.richTextBox.Document.ContentStart, shape.richTextBox.Document.ContentEnd);
+                string text = textRange.Text;
+
+                // Write the length of the text
+                writer.Write(text.Length);
+
+                // Write the text content
+                writer.Write(text);
+
+                // Write the foreground color
+                System.Windows.Media.Color foregroundColor = (shape.richTextBox.Foreground as SolidColorBrush)?.Color ?? Colors.Black;
+                writer.Write(foregroundColor.A);
+                writer.Write(foregroundColor.R);
+                writer.Write(foregroundColor.G);
+                writer.Write(foregroundColor.B);
+
+                // Write the font family
+                writer.Write(shape.richTextBox.FontFamily.ToString());
+
+                // Write the font size
+                writer.Write(shape.richTextBox.FontSize);
+
+
+                foreach (var child in shape.richTextBox.Document.Blocks)
+                {
+                    if (child is Paragraph)
+                    {
+                        TextRange t = new TextRange(child.ContentStart, child.ContentEnd);
+                        // Check if the background property is set
+                        if (t.GetPropertyValue(TextElement.BackgroundProperty) is SolidColorBrush backgroundBrush)
+                        {
+                            // Get the color
+                            System.Windows.Media.Color color1 = backgroundBrush.Color;
+                            // Write the color components
+                            writer.Write(color1.A);
+                            writer.Write(color1.R);
+                            writer.Write(color1.G);
+                            writer.Write(color1.B);
+                        }
+                        else
+                        {
+                            // Write default color if background property is not set
+                            writer.Write(Colors.Transparent.A);
+                            writer.Write(Colors.Transparent.R);
+                            writer.Write(Colors.Transparent.G);
+                            writer.Write(Colors.Transparent.B);
+                        }
+                    }
+                }
+
+            } else
+            {
+                writer.Write(false);
+            }
+
+
         }
         public void importCanvas(string fileName)
         {
@@ -271,14 +342,18 @@ namespace MyPaint
                             byte r = reader.ReadByte();
                             byte g = reader.ReadByte();
                             byte b = reader.ReadByte();
-                            SolidColorBrush brush = new SolidColorBrush(Color.FromArgb(a, r, g, b));
+                            SolidColorBrush brush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(a, r, g, b));
                             byte ba = reader.ReadByte();
                             byte br = reader.ReadByte();
                             byte bg = reader.ReadByte();
                             byte bb = reader.ReadByte();
-                            SolidColorBrush background = new SolidColorBrush(Color.FromArgb(ba, br, bg, bb));
-                            Point startPoint = new Point(reader.ReadDouble(), reader.ReadDouble());
-                            Point endPoint = new Point(reader.ReadDouble(), reader.ReadDouble());
+                            SolidColorBrush background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(ba, br, bg, bb));
+                            System.Windows.Point startPoint = new System.Windows.Point(reader.ReadDouble(), reader.ReadDouble());
+                            System.Windows.Point endPoint = new System.Windows.Point(reader.ReadDouble(), reader.ReadDouble());
+                            double angle = reader.ReadDouble();
+
+                            // Read RichTextBox data if available
+                            System.Windows.Controls.RichTextBox richTextBox = null;
 
                             IShape shape;
                             // Create an instance of IShape using the read data
@@ -292,8 +367,8 @@ namespace MyPaint
                                     myDownArrow.Brush = brush;
                                     myDownArrow.fillColor = background;
                                     myDownArrow.StrokeDash = strokeDash;
+                                    myDownArrow.Angle = angle;
                                     shape = (IShape)myDownArrow;
-                                    drawnShapes.Add(shape);
                                     break;
                                 case "Ellipse":
                                     MyEllipse myEllipse = new MyEllipse();
@@ -303,8 +378,8 @@ namespace MyPaint
                                     myEllipse.Brush = brush;
                                     myEllipse.fillColor = background;
                                     myEllipse.StrokeDash = strokeDash;
+                                    myEllipse.Angle = angle;
                                     shape = (IShape)myEllipse;
-                                    drawnShapes.Add(shape);
                                     break;
                                 case "LeftArrow":
                                     MyLeftArrow myLeftArrow = new MyLeftArrow();
@@ -314,8 +389,8 @@ namespace MyPaint
                                     myLeftArrow.Brush = brush;
                                     myLeftArrow.StrokeDash = strokeDash;
                                     myLeftArrow.fillColor = background;
+                                    myLeftArrow.Angle = angle;
                                     shape = (IShape)myLeftArrow;
-                                    drawnShapes.Add(shape);
                                     break;
                                 case "Line":
                                     MyLine myLine = new MyLine();
@@ -325,8 +400,8 @@ namespace MyPaint
                                     myLine.Brush = brush;
                                     myLine.StrokeDash = strokeDash;
                                     myLine.fillColor = background;
+                                    myLine.Angle = angle;
                                     shape = (IShape)myLine;
-                                    drawnShapes.Add(shape);
                                     break;
                                 case "Rectangle":
                                     MyRectangle myRectangle = new MyRectangle();
@@ -336,8 +411,8 @@ namespace MyPaint
                                     myRectangle.Brush = brush;
                                     myRectangle.StrokeDash = strokeDash;
                                     myRectangle.fillColor = background;
+                                    myRectangle.Angle = angle;
                                     shape = (IShape)myRectangle;
-                                    drawnShapes.Add(shape);
                                     break;
                                 case "RightArrow":
                                     MyRightArrow myRightArrow = new MyRightArrow();
@@ -347,8 +422,8 @@ namespace MyPaint
                                     myRightArrow.Brush = brush;
                                     myRightArrow.StrokeDash = strokeDash;
                                     myRightArrow.fillColor = background;
+                                    myRightArrow.Angle = angle;
                                     shape = (IShape)myRightArrow;
-                                    drawnShapes.Add(shape);
                                     break;
                                 case "Star":
                                     MyStar myStar = new MyStar();
@@ -358,8 +433,8 @@ namespace MyPaint
                                     myStar.Brush = brush;
                                     myStar.StrokeDash = strokeDash;
                                     myStar.fillColor = background;
+                                    myStar.Angle = angle;
                                     shape = (IShape)myStar;
-                                    drawnShapes.Add(shape);
                                     break;
                                 case "Triangle":
                                     MyTriangle myTriangle = new MyTriangle();
@@ -369,8 +444,8 @@ namespace MyPaint
                                     myTriangle.Brush = brush;
                                     myTriangle.StrokeDash = strokeDash;
                                     myTriangle.fillColor = background;
+                                    myTriangle.Angle = angle;
                                     shape = (IShape)myTriangle;
-                                    drawnShapes.Add(shape);
                                     break;
                                 case "UpArrow":
                                     MyUpArrow myUpArrow = new MyUpArrow();
@@ -380,33 +455,92 @@ namespace MyPaint
                                     myUpArrow.Brush = brush;
                                     myUpArrow.StrokeDash = strokeDash;
                                     myUpArrow.fillColor = background;
+                                    myUpArrow.Angle = angle;
                                     shape = (IShape)myUpArrow;
                                     drawnShapes.Add(shape);
                                     break;
                                 default:
                                     throw new ArgumentException("Unexpected value for name");
                             }
+                            if (reader.ReadBoolean())
+                            {
+                                // Read text content
+                                int textLength = reader.ReadInt32();
+                                string text = reader.ReadString();
+
+                                // Read foreground color
+                                byte foregroundA = reader.ReadByte();
+                                byte foregroundR = reader.ReadByte();
+                                byte foregroundG = reader.ReadByte();
+                                byte foregroundB = reader.ReadByte();
+                                SolidColorBrush foregroundColor = new SolidColorBrush(System.Windows.Media.Color.FromArgb(foregroundA, foregroundR, foregroundG, foregroundB));
+
+                                // Read font family
+                                string fontFamily = reader.ReadString();
+
+                                // Read font size
+                                double fontSize = reader.ReadDouble();
+
+                                richTextBox = new System.Windows.Controls.RichTextBox()
+                                {
+                                    Width = Math.Abs(endPoint.X - startPoint.X),
+                                    Height = Math.Abs(endPoint.Y - startPoint.Y),
+                                    Background = Brushes.Transparent,
+                                    Foreground = foregroundColor,
+                                    FontFamily = new FontFamily(fontFamily),
+                                    FontSize = fontSize,
+                                    BorderThickness = new Thickness(0), // Remove the border of the RichTextBox
+                                    HorizontalAlignment = HorizontalAlignment.Center, // Center the RichTextBox horizontally
+                                    VerticalAlignment = VerticalAlignment.Center, // Center the RichTextBox vertically
+                                };
+
+                                // Read paragraph background color
+                                byte paraBackgroundA = reader.ReadByte();
+                                byte paraBackgroundR = reader.ReadByte();
+                                byte paraBackgroundG = reader.ReadByte();
+                                byte paraBackgroundB = reader.ReadByte();
+                                SolidColorBrush paraBackgroundColor = new SolidColorBrush(System.Windows.Media.Color.FromArgb(paraBackgroundA, paraBackgroundR, paraBackgroundG, paraBackgroundB));
+
+                                // Create a new paragraph and add it to the RichTextBox
+                                Paragraph paragraph = new Paragraph();
+
+                                // Set paragraph alignment to center
+                                paragraph.TextAlignment = TextAlignment.Center;
+                                richTextBox.Document.Blocks.Add(paragraph);
+                                richTextBox.Padding = new Thickness(0, 0, 0, 0);
+
+                                // Set the text
+                                TextRange textRange = new TextRange(paragraph.ContentStart, paragraph.ContentEnd);
+                                textRange.Text = text;
+
+                                // Set the background color of the selected text
+                                textRange.ApplyPropertyValue(TextElement.BackgroundProperty, paraBackgroundColor);
+
+                                shape.richTextBox = richTextBox;
+                            }
+                            drawnShapes.Add(shape);
                         }
                     }
                 }
+                Main_Canvas.Children.Clear();
                 RedrawCanvas();
-                MessageBox.Show("Shapes imported successfully.", "Import Shapes", MessageBoxButton.OK, MessageBoxImage.Information);
+                System.Windows.MessageBox.Show("Shapes imported successfully.", "Import Shapes", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error importing shapes: " + ex.Message, "Import Shapes", MessageBoxButton.OK, MessageBoxImage.Error);
+                System.Windows.MessageBox.Show("Error importing shapes: " + ex.Message, "Import Shapes", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         private void UndoButton_Click(object sender, RoutedEventArgs e)
         {
-            Command control = new UndoCommand(revisionControl, drawnShapes, _buffer);
+            Command control = new UndoCommand(revisionControl, drawnShapes, forwardBuffer);
             ToolBarCommand toolBarCommand = new ToolBarCommand(control);
             toolBarCommand.Toolbar_Undo();
             RedrawCanvas();
         }
         private void RedoButton_Click(object sender, RoutedEventArgs e)
         {
-            Command control = new UndoCommand(revisionControl, drawnShapes, _buffer);
+            Command control = new UndoCommand(revisionControl, drawnShapes, forwardBuffer);
             ToolBarCommand toolBarCommand = new ToolBarCommand(control);
             toolBarCommand.Toolbar_Redo();
             RedrawCanvas();
@@ -473,6 +607,37 @@ namespace MyPaint
 
             Clipboard.SetImage(renderTargetBitmap);
         }
+
+        private void EraseButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (choice == myMode.select.ToString())
+            {
+                CopySelectedAreaToClipboard();
+                choice = "";
+                TextBlock selectTextBlock = (TextBlock)FindName("SelectTB");
+                if (selectTextBlock != null)
+                {
+                    selectTextBlock.Text = "Select";
+                }
+            }
+            else
+            {
+                choice = myMode.select.ToString();
+                MyRectangle rect = new MyRectangle();
+                currentShape = rect;
+                TextBlock selectTextBlock = (TextBlock)FindName("SelectTB");
+                if (selectTextBlock != null)
+                {
+                    selectTextBlock.Text = "Copy to Clipboard";
+                }
+            }
+        }
+
+        private void LayersButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         private void SelectButton_Click(object sender, RoutedEventArgs e)
         {
             if (choice == myMode.select.ToString())
@@ -498,6 +663,70 @@ namespace MyPaint
             }
         }
 
+        // --- Add text button
+        private void TextButton_Click(object sender, RoutedEventArgs e)
+        {
+            TextBlock textBlock = (TextBlock)FindName("AddTextTB");
+            if (choice != myMode.text.ToString())
+            {
+                if (selectingIndex > -1)
+                {
+                    Grid stackPanel = (Grid)FindName("TextToolbar");
+                    if (stackPanel != null)
+                    {
+                        stackPanel.Visibility = Visibility.Visible;
+                    }
+                    if (drawnShapes[selectingIndex].richTextBox == null)
+                    {
+                        // Create a RichTextBox
+                        System.Windows.Controls.RichTextBox richTextBox = new System.Windows.Controls.RichTextBox()
+                        {
+                            Width = Math.Abs(drawnShapes[selectingIndex].endPoint.X - drawnShapes[selectingIndex].startPoint.X), // Set the width of the RichTextBox
+                            Height = Math.Abs(drawnShapes[selectingIndex].endPoint.Y - drawnShapes[selectingIndex].startPoint.Y), // Set the height of the RichTextBox
+                            Background = Brushes.Transparent,
+                            Foreground = Brushes.Black, // Set the foreground color of the RichTextBox
+                            BorderThickness = new Thickness(0), // Remove the border of the RichTextBox
+                            HorizontalAlignment = HorizontalAlignment.Center, // Center the RichTextBox horizontally
+                            VerticalAlignment = VerticalAlignment.Center, // Center the RichTextBox vertically
+                        };
+
+                        // Create a new paragraph and add it to the RichTextBox
+                        Paragraph paragraph = new Paragraph();
+                        richTextBox.Document.Blocks.Add(paragraph);
+
+                        // Set the default font family and size
+                        richTextBox.Selection.ApplyPropertyValue(TextElement.FontFamilyProperty, new FontFamily("Arial"));
+                        richTextBox.Selection.ApplyPropertyValue(TextElement.FontSizeProperty, 12.0);
+                        richTextBox.Padding = new Thickness(0, 0, 0, 0);
+                        // Set the text
+                        string text = "Sample";
+                        TextRange textRange = new TextRange(paragraph.ContentStart, paragraph.ContentEnd);
+                        textRange.Text = text;
+
+                        // Set the background color of the selected text
+                        textRange.ApplyPropertyValue(TextElement.BackgroundProperty, Brushes.Transparent);
+                        // Set paragraph alignment to center
+                        paragraph.TextAlignment = TextAlignment.Center;
+
+                        drawnShapes[selectingIndex].richTextBox = richTextBox;
+                        RedrawCanvas();
+                    }
+                    textBlock.Text = "Exit Mode";
+                    choice = myMode.text.ToString();
+                }
+            } else
+            {
+                textBlock.Text = "Add Text";
+                Grid stackPanel = (Grid)FindName("TextToolbar");
+                if (stackPanel != null)
+                {
+                    stackPanel.Visibility = Visibility.Hidden;
+                }
+                choice = "";
+            }
+            
+        }
+
         // --- Select Shape Button
         private void ShapeButton_Click(object sender, RoutedEventArgs e)
         {
@@ -506,17 +735,62 @@ namespace MyPaint
             currentShape = item;
         }
 
+        // --- Select TextColor
+        private void TextColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
+        {
+            textColor = new SolidColorBrush(e.NewValue.Value);
+            if(selectingIndex > -1)
+            {
+                if (drawnShapes[selectingIndex].richTextBox != null)
+                {
+                    drawnShapes[selectingIndex].richTextBox.Foreground = textColor;
+                    RedrawCanvas();
+                }
+            }
+            
+        }
+        private void TextBackgroundColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
+        {
+            backgroundColor = new SolidColorBrush(e.NewValue.Value);
+            if (selectingIndex > -1)
+            {
+                if (drawnShapes[selectingIndex].richTextBox != null)
+                {
+                    foreach(var child in drawnShapes[selectingIndex].richTextBox.Document.Blocks)
+                    {
+                        if(child is Paragraph)
+                        {
+                            TextRange textRange = new TextRange(child.ContentStart, child.ContentEnd);
+                            // Set the background color of the selected text
+                            textRange.ApplyPropertyValue(TextElement.BackgroundProperty, backgroundColor);
+                        }
+                    }
+                    RedrawCanvas();
+                }
+            }
+        }
+
         // --- Select Color Stroke & Fill
-        private void StrokeColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        private void StrokeColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
         {
             SolidColorBrush color = new SolidColorBrush(e.NewValue.Value);
             foreach (IShape shape in prototypeShapes) { shape.Brush = color; }
+            if(selectingIndex > -1)
+            {
+                drawnShapes[selectingIndex].Brush = color;
+                RedrawCanvas();
+            }
         }
         
-        private void FillColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<Color?> e)
+        private void FillColorPicker_SelectedColorChanged(object sender, RoutedPropertyChangedEventArgs<System.Windows.Media.Color?> e)
         {
             SolidColorBrush color = new SolidColorBrush(e.NewValue.Value);
             foreach (IShape shape in prototypeShapes) { shape.fillColor = color; }
+            if (selectingIndex > -1)
+            {
+                drawnShapes[selectingIndex].fillColor = color;
+                RedrawCanvas();
+            }
         }
 
         // --- Select Stroke Thickness
@@ -524,6 +798,11 @@ namespace MyPaint
         {
             StrokeThickness_TextBlock.Text = Math.Ceiling(e.NewValue).ToString();
             foreach (IShape shape in prototypeShapes) { shape.Thickness = e.NewValue; }
+            if (selectingIndex > -1)
+            {
+                drawnShapes[selectingIndex].Thickness = e.NewValue;
+                RedrawCanvas();
+            }
         }
 
         // --- Select Stroke Dash
@@ -537,13 +816,18 @@ namespace MyPaint
                 if (selectedTag == "Solid") { shape.StrokeDash = null; }
                 else { shape.StrokeDash = dashCollections[selectedTag]; }
             }
+            if (selectingIndex > -1)
+            {
+                drawnShapes[selectingIndex].StrokeDash = dashCollections[selectedTag];
+                RedrawCanvas();
+            }
         }
 
         // --- Clean Button
         private void CleanButton_Click(object sender, RoutedEventArgs e)
         {
             Main_Canvas.Children.Clear();
-            // drawnShapes.Clear();
+            drawnShapes.Clear();
         }
 
         // --- TEST Redraw Button
@@ -569,7 +853,7 @@ namespace MyPaint
                 Canvas selectingCanvas = (Canvas)Main_Canvas.Children[selectingIndex];
 
                 RotateTransform rotateTransform = new RotateTransform(angle);
-                selectingCanvas.RenderTransformOrigin = new Point(0.5, 0.5);
+                selectingCanvas.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
 
                 selectingCanvas.RenderTransform = rotateTransform;
 
@@ -585,9 +869,9 @@ namespace MyPaint
         private void MainCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             isSelecting = false;
+            Main_Canvas.Focus();
             RemoveSelectingShape();
             selectingIndex = -1;
-
             RotateShape_Border.Visibility = Visibility.Hidden;
         }
 
@@ -628,9 +912,9 @@ namespace MyPaint
                     drawnShapes.RemoveAt(drawnShapes.Count - 1);
                 }
                 drawnShapes.Add((IShape)currentShape.Clone());
-                if (_buffer.Count > 0)
+                if (forwardBuffer.Count > 0)
                 {
-                    _buffer.Clear();
+                    forwardBuffer.Clear();
                 }
                 // Then re-draw it
                 Canvas shapeCanvas = currentShape.Convert();
@@ -657,7 +941,6 @@ namespace MyPaint
         {
             if (isDrawing == true && isDrawn == false)
             {
-                IShape clone = (IShape)currentShape.Clone();
                 isDrawn = true;
             }
         }
@@ -675,6 +958,12 @@ namespace MyPaint
 
                 dragStartPoint = e.GetPosition(Main_Canvas);
 
+                if(drawnShapes[selectingIndex].richTextBox != null)
+                {
+                    drawnShapes[selectingIndex].richTextBox.Focus();    
+                }
+                
+
                 RotateShape_Border.Visibility = Visibility.Visible;
                 Angle_Slider.Value = drawnShapes[selectingIndex].Angle;
             }
@@ -686,7 +975,7 @@ namespace MyPaint
             {
                 Canvas shapeCanvas = Main_Canvas.Children[selectingIndex] as Canvas;
                 shapeCanvas.Cursor = Cursors.SizeAll;
-                Point currentPoint = e.GetPosition(Main_Canvas);
+                System.Windows.Point currentPoint = e.GetPosition(Main_Canvas);
                 double offsetX = currentPoint.X - dragStartPoint.X;
                 double offsetY = currentPoint.Y - dragStartPoint.Y;
 
@@ -705,8 +994,8 @@ namespace MyPaint
             {
                 if (sender is Canvas shapeCanvas)
                 {
-                    drawnShapes[selectingIndex].startPoint = new Point(Canvas.GetLeft(shapeCanvas), Canvas.GetTop(shapeCanvas));
-                    drawnShapes[selectingIndex].endPoint = new Point(Canvas.GetLeft(shapeCanvas) + shapeCanvas.ActualWidth, Canvas.GetTop(shapeCanvas) + shapeCanvas.ActualHeight);
+                    drawnShapes[selectingIndex].startPoint = new System.Windows.Point(Canvas.GetLeft(shapeCanvas), Canvas.GetTop(shapeCanvas));
+                    drawnShapes[selectingIndex].endPoint = new System.Windows.Point(Canvas.GetLeft(shapeCanvas) + shapeCanvas.ActualWidth, Canvas.GetTop(shapeCanvas) + shapeCanvas.ActualHeight);
                 }
             }
             // For Line, Rectangle because they are hit the cursor => Do not catch the MainCanvas_MouseUp event
@@ -722,13 +1011,16 @@ namespace MyPaint
         {
             if (selectingIndex != -1)
             {
-                Canvas selectingCanvas = (Canvas)Main_Canvas.Children[selectingIndex];
-                foreach (UIElement child in selectingCanvas.Children)
+                if(Main_Canvas.Children.Count > 0)
                 {
-                    if (child is Rectangle rectangle && rectangle.Name == "Selecting_Rectangle")
+                    Canvas selectingCanvas = (Canvas)Main_Canvas.Children[selectingIndex];
+                    foreach (UIElement child in selectingCanvas.Children)
                     {
-                        selectingCanvas.Children.Remove(rectangle);
-                        break;
+                        if (child is System.Windows.Shapes.Rectangle rectangle && rectangle.Name == "Selecting_Rectangle")
+                        {
+                            selectingCanvas.Children.Remove(rectangle);
+                            break;
+                        }
                     }
                 }
             }
@@ -736,7 +1028,7 @@ namespace MyPaint
 
         private void DrawSelectingShape(Canvas canvas)
         {
-            Rectangle selectingRectangle = new Rectangle
+            System.Windows.Shapes.Rectangle selectingRectangle = new System.Windows.Shapes.Rectangle
             {
                 Width = canvas.ActualWidth,
                 Height = canvas.ActualHeight,
@@ -750,5 +1042,37 @@ namespace MyPaint
             canvas.Children.Add(selectingRectangle);
         }
 
+        private void FontSizeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(selectingIndex > -1)
+            {
+                ComboBoxItem selectedItem = (ComboBoxItem)FontSizeComboBox.SelectedItem;
+
+                // Check if an item is selected
+                if (selectedItem != null)
+                {
+                    string fontSize = selectedItem.Content.ToString();
+                    double selectedFontSize = Convert.ToDouble(fontSize);
+                    drawnShapes[selectingIndex].richTextBox.FontSize = selectedFontSize;
+                    RedrawCanvas();
+                }
+            }
+        }
+
+        private void FontComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (selectingIndex > -1)
+            {
+                ComboBoxItem selectedItem = (ComboBoxItem)FontComboBox.SelectedItem;
+
+                // Check if an item is selected
+                if (selectedItem != null)
+                {
+                    string font = selectedItem.Content.ToString();
+                    drawnShapes[selectingIndex].richTextBox.FontFamily = new FontFamily(font);
+                    RedrawCanvas();
+                }
+            }
+        }
     }
 }

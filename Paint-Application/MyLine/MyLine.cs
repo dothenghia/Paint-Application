@@ -4,6 +4,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 
 namespace Line_
 {
@@ -12,6 +13,7 @@ namespace Line_
         // ==================== Attributes ====================
         public string Name => "Line"; // Name of the shape
         public string Icon => "Assets/line.png"; // Path to the icon
+        public RichTextBox richTextBox { get; set; }
         public double Thickness { get; set; } = 3;
         public double Angle { get; set; } = 0;
         public DoubleCollection StrokeDash { get; set; } = new DoubleCollection();
@@ -23,7 +25,53 @@ namespace Line_
         // Clone the object
         public object Clone()
         {
-            return MemberwiseClone();
+            IShape clonedShape = (IShape)MemberwiseClone();
+
+            // Clone the RichTextBox if it exists
+            if (richTextBox != null)
+            {
+                // Create a RichTextBox
+                clonedShape.richTextBox = new System.Windows.Controls.RichTextBox()
+                {
+                    Width = Math.Abs(endPoint.X - startPoint.X),
+                    Height = Math.Abs(endPoint.Y - startPoint.Y),
+                    Background = Brushes.Transparent,
+                    Foreground = richTextBox.Foreground,
+                    BorderThickness = new Thickness(0),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                };
+
+                TextRange textRange = new TextRange(richTextBox.Document.ContentStart, richTextBox.Document.ContentEnd);
+                string text = textRange.Text;
+
+                string fontFamily = richTextBox.FontFamily.ToString();
+                double fontSize = richTextBox.FontSize;
+
+                Paragraph paragraph = new Paragraph();
+                paragraph.TextAlignment = TextAlignment.Center;
+
+                clonedShape.richTextBox.Document.Blocks.Add(paragraph);
+                clonedShape.richTextBox.FontFamily = new FontFamily(fontFamily);
+                clonedShape.richTextBox.FontSize = fontSize;
+                clonedShape.richTextBox.Padding = new Thickness(0, 0, 0, 0);
+                TextRange textRangeCloned = new TextRange(paragraph.ContentStart, paragraph.ContentEnd);
+                textRangeCloned.Text = text.Replace("\r\n", ""); ;
+
+                foreach (var child in richTextBox.Document.Blocks.ToList())
+                {
+                    if (child is Paragraph)
+                    {
+                        TextRange t = new TextRange(child.ContentStart, child.ContentEnd);
+                        if (t.GetPropertyValue(TextElement.BackgroundProperty) is SolidColorBrush backgroundTextColor)
+                        {
+                            textRangeCloned.ApplyPropertyValue(TextElement.BackgroundProperty, backgroundTextColor);
+                        }
+                    }
+                }
+            }
+
+            return clonedShape;
         }
 
         // Convert the object to a UIElement - Draw the shape
@@ -56,6 +104,20 @@ namespace Line_
             };
 
             frameCanvas.Children.Add(line);
+
+
+            // Remove the RichTextBox from its current parent before adding it to frameCanvas
+            if (richTextBox != null && richTextBox.Parent != null)
+            {
+                var parent = richTextBox.Parent as Panel;
+                parent.Children.Remove(richTextBox);
+            }
+
+            if (richTextBox != null)
+            {
+                frameCanvas.Children.Add(richTextBox);
+            }
+
             RotateTransform rotateTransform = new RotateTransform(Angle);
             frameCanvas.RenderTransformOrigin = new Point(0.5, 0.5);
             frameCanvas.RenderTransform = rotateTransform;

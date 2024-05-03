@@ -67,7 +67,7 @@
 
             <Button Click="UndoButton_Click" ToolTip="Undo file" Style="{StaticResource ToobarButton_Style}">Undo</Button>
             <Button Click="RedoButton_Click" ToolTip="Redo file" Style="{StaticResource ToobarButton_Style}">Redo</Button>
-            
+
             <StackPanel Style="{StaticResource ToolbarDivider_Style}"/>
 
             <Button Click="CopyButton_Click" ToolTip="Copy" Style="{StaticResource ToobarButton_Style}">Copy</Button>
@@ -78,157 +78,232 @@
 
             <Button Click="ExitButton_Click" ToolTip="Exit file" Style="{StaticResource ToobarButton_Style}">Exit</Button>
         </ToolBar>
-
-
+        
         <!-- ====== Functional Bar ====== -->
         <Grid DockPanel.Dock="Top">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Style="{StaticResource FunctionalBarSectionBorder_Style}">
-                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                    <!-- Select Button -->
-                    <Button Click="SelectButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
-                        <Image Source="Assets/select.png"/>
-                    </Button>
-                    <TextBlock x:Name="SelectTB" Style="{StaticResource FunctionalBarSectionTitle_Style}">Selection</TextBlock>
-                </StackPanel>
-            </Border>
-
-            <Border Grid.Column="1" Style="{StaticResource FunctionalBarSectionBorder_Style}">
-                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                    <!-- Draw Shape Buttons -->
-                    <StackPanel Orientation="Horizontal" x:Name="Shapes_StackPanel">
-                        <!-- RENDER BUTTONS HERE -->
+                <Border Grid.Column="0" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                        <!-- Select Button -->
+                        <Button Click="SelectButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
+                            <Image Source="Assets/select.png"/>
+                        </Button>
+                        <TextBlock x:Name="SelectTB" Style="{StaticResource FunctionalBarSectionTitle_Style}">Selection</TextBlock>
                     </StackPanel>
+                </Border>
 
-                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Shapes</TextBlock>
-                </StackPanel>
-            </Border>
-
-            <Border Grid.Column="2" Style="{StaticResource FunctionalBarSectionBorder_Style}">
-                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                    <!-- Color Picker -->
-                    <StackPanel Orientation="Horizontal">
-                        <xctk:ColorPicker SelectedColor="Black" SelectedColorChanged="StrokeColorPicker_SelectedColorChanged"
-                            Width="80" Height="32" Margin="4, 0, 4, 8"></xctk:ColorPicker>
-
-                        <xctk:ColorPicker SelectedColor="White" SelectedColorChanged="FillColorPicker_SelectedColorChanged"
-                            Width="80" Height="32" Margin="4, 0, 4, 8"></xctk:ColorPicker>
+                <Border Grid.Column="1" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                        <!-- Select Button -->
+                        <Button Click="TextButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
+                            <Image Source="Assets/text.png"/>
+                        </Button>
+                        <TextBlock Name="AddTextTB" Style="{StaticResource FunctionalBarSectionTitle_Style}">Add Text</TextBlock>
                     </StackPanel>
+                </Border>
 
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke Color</TextBlock>
-                        <TextBlock Grid.Column="1" Style="{StaticResource FunctionalBarSectionTitle_Style}">Fill Color</TextBlock>
-                    </Grid>
-                </StackPanel>
-            </Border>
+                <Border Grid.Column="2" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                        <!-- Draw Shape Buttons -->
+                        <StackPanel Orientation="Horizontal" x:Name="Shapes_StackPanel">
+                            <!-- RENDER BUTTONS HERE -->
+                        </StackPanel>
 
-            <Border Grid.Column="3" Style="{StaticResource FunctionalBarSectionBorder_Style}">
-                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                    <!-- Stroke Thickness Slider -->
-                    <TextBlock x:Name="StrokeThickness_TextBlock" Style="{StaticResource FunctionalBarSectionTitle_Style}">3</TextBlock>
+                        <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Shapes</TextBlock>
+                    </StackPanel>
+                </Border>
 
-                    <Slider Width="120" Margin="4, 0, 4, 8"
+                <Border Grid.Column="3" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                        <!-- Color Picker -->
+                        <StackPanel Orientation="Horizontal">
+                            <xctk:ColorPicker SelectedColor="Black" SelectedColorChanged="StrokeColorPicker_SelectedColorChanged"
+                    Width="80" Height="32" Margin="4, 0, 4, 8"></xctk:ColorPicker>
+
+                            <xctk:ColorPicker SelectedColor="White" SelectedColorChanged="FillColorPicker_SelectedColorChanged"
+                    Width="80" Height="32" Margin="4, 0, 4, 8"></xctk:ColorPicker>
+                        </StackPanel>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke Color</TextBlock>
+                            <TextBlock Grid.Column="1" Style="{StaticResource FunctionalBarSectionTitle_Style}">Fill Color</TextBlock>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="4" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                        <!-- Stroke Thickness Slider -->
+                        <TextBlock x:Name="StrokeThickness_TextBlock" Style="{StaticResource FunctionalBarSectionTitle_Style}">3</TextBlock>
+
+                        <Slider Width="120" Margin="4, 0, 4, 8"
                             Minimum="1" Maximum="10" Value="3"
                             TickFrequency="1" TickPlacement="BottomRight" IsSnapToTickEnabled="True"
                             ValueChanged="StrokeThicknessSlider_ValueChanged"/>
 
-                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke Size</TextBlock>
+                        <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke Size</TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="5" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                        <!-- Stroke Style Button -->
+
+                        <ComboBox x:Name="StrokeDash_ComboBox" SelectionChanged="StrokeDashComboBox_SelectionChanged"
+                      Height="36" Width="100" Margin="4, 0, 4, 8" SelectedIndex="0">
+                            <ComboBoxItem Tag="Solid">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="Assets/stroke-solid.png" Height="32" Width="70"/>
+                                    <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Solid</TextBlock>
+                                </StackPanel>
+                            </ComboBoxItem>
+                            <ComboBoxItem Tag="Dash">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="Assets/stroke-dash.png" Height="32" Width="70"/>
+                                    <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Dash</TextBlock>
+                                </StackPanel>
+                            </ComboBoxItem>
+                            <ComboBoxItem Tag="Dot">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="Assets/stroke-dot.png" Height="32" Width="70"/>
+                                    <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Dot</TextBlock>
+                                </StackPanel>
+                            </ComboBoxItem>
+                            <ComboBoxItem Tag="Dash Dot">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="Assets/stroke-dash-dot.png" Height="32" Width="70"/>
+                                    <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Dash Dot</TextBlock>
+                                </StackPanel>
+                            </ComboBoxItem>
+                            <ComboBoxItem Tag="Dash Dot Dot">
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Source="Assets/stroke-dash-dot-dot.png" Height="32" Width="70"/>
+                                    <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Dash Dot Dot</TextBlock>
+                                </StackPanel>
+                            </ComboBoxItem>
+
+                        </ComboBox>
+
+                        <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke Dash</TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="6" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
+                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                        <!-- Layers Button -->
+                        <Button Click="LayersButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
+                            <Image Source="Assets/layer.png"/>
+                        </Button>
+                        <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Layers</TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Column="7" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                        <!-- Clean Button -->
+                        <Button Click="CleanButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
+                            <Image Source="Assets/clean.png"/>
+                        </Button>
+                        <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Clean</TextBlock>
+                    </StackPanel>
+                </Border>
+
+                <!--<Border Grid.Column="6" Style="{StaticResource FunctionalBarSectionBorder_Style}">
+                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                        --><!-- TEST Button --><!--
+                        <Button Click="RedrawButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
+                            <Image Source="Assets/rotate-left.png"/>
+                        </Button>
+                        <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">TEST REDRAW</TextBlock>
+                    </StackPanel>
+                </Border>-->
+
+                <Border x:Name="RotateShape_Border" Visibility="Hidden" Grid.Column="8" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
+                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
+                        <!-- Rotate Shape -->
+                        <TextBox Text="{Binding ElementName=Angle_Slider, Path=Value, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumericConverter}}" TextAlignment="Center" Width="40" />
+                        <Slider Width="150" Margin="4, 4, 4, 2" Name="Angle_Slider"
+                Minimum="-179" Maximum="180" Value="0"
+                TickFrequency="1" TickPlacement="None" IsSnapToTickEnabled="True"
+                ValueChanged="AngleSlider_ValueChanged"/>
+
+                        <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Rotate</TextBlock>
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <Grid Grid.Row="1" Name="TextToolbar" Visibility="Hidden">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Vertical" >
+                    <!-- Color Picker for Stroke (Text) Color -->
+                    <xctk:ColorPicker SelectedColor="Black" SelectedColorChanged="TextColorPicker_SelectedColorChanged" Width="80" Height="32" Margin="4, 0, 4, 8" Grid.Column="1"/>
+                    <!-- Label for Stroke (Text) Color -->
+                    <Label Content="Text Color" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </StackPanel>
-            </Border>
 
-            <Border Grid.Column="4" Style="{StaticResource FunctionalBarSectionBorder_Style}">
-                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                    <!-- Stroke Style Button -->
+                <StackPanel Grid.Column="1" Orientation="Vertical" >
+                    <!-- Color Picker for Background Color -->
+                    <xctk:ColorPicker SelectedColor="White" SelectedColorChanged="TextBackgroundColorPicker_SelectedColorChanged"
+                            Width="80" Height="32" Margin="4, 0, 4, 8" Grid.Column="3"/>
+                    <!-- Label for Background Color -->
+                    <Label Content="Background Color" HorizontalAlignment="Center" VerticalAlignment="Center" />
 
-                    <ComboBox x:Name="StrokeDash_ComboBox" SelectionChanged="StrokeDashComboBox_SelectionChanged"
-                              Height="36" Width="100" Margin="4, 0, 4, 8" SelectedIndex="0">
-                        <ComboBoxItem Tag="Solid">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="Assets/stroke-solid.png" Height="32" Width="70"/>
-                                <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Solid</TextBlock>
-                            </StackPanel>
-                        </ComboBoxItem>
-                        <ComboBoxItem Tag="Dash">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="Assets/stroke-dash.png" Height="32" Width="70"/>
-                                <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Dash</TextBlock>
-                            </StackPanel>
-                        </ComboBoxItem>
-                        <ComboBoxItem Tag="Dot">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="Assets/stroke-dot.png" Height="32" Width="70"/>
-                                <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Dot</TextBlock>
-                            </StackPanel>
-                        </ComboBoxItem>
-                        <ComboBoxItem Tag="Dash Dot">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="Assets/stroke-dash-dot.png" Height="32" Width="70"/>
-                                <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Dash Dot</TextBlock>
-                            </StackPanel>
-                        </ComboBoxItem>
-                        <ComboBoxItem Tag="Dash Dot Dot">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="Assets/stroke-dash-dot-dot.png" Height="32" Width="70"/>
-                                <TextBlock VerticalAlignment="Center" Margin="8, 0, 0, 0">Dash Dot Dot</TextBlock>
-                            </StackPanel>
-                        </ComboBoxItem>
+                </StackPanel>
 
+                <StackPanel Grid.Column="2" Orientation="Vertical" >
+                    <!-- ComboBox for Font Size -->
+                    <ComboBox Name="FontSizeComboBox" SelectionChanged="FontSizeComboBox_SelectionChanged" Width="80" Height="32" Margin="4, 0, 4, 8" Grid.Column="5">
+                        <ComboBoxItem Content="6"/>
+                        <ComboBoxItem Content="8"/>
+                        <ComboBoxItem Content="10"/>
+                        <ComboBoxItem Content="12"/>
+                        <ComboBoxItem Content="14"/>
+                        <ComboBoxItem Content="16"/>
+                        <ComboBoxItem Content="18"/>
+                        <ComboBoxItem Content="20"/>
+                        <ComboBoxItem Content="22"/>
+                        <!-- Add more font sizes as needed -->
                     </ComboBox>
-                    
-                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Stroke Dash</TextBlock>
+                    <!-- Label for Font Size -->
+                    <Label Content="Font Size" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </StackPanel>
-            </Border>
-
-            <Border Grid.Column="5" Style="{StaticResource FunctionalBarSectionBorder_Style}">
-                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                    <!-- Clean Button -->
-                    <Button Click="CleanButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
-                        <Image Source="Assets/clean.png"/>
-                    </Button>
-                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Clean</TextBlock>
+                <StackPanel Grid.Column="3" Orientation="Vertical" >
+                    <!-- ComboBox for Font Family -->
+                    <ComboBox Name="FontComboBox" SelectionChanged="FontComboBox_SelectionChanged" Width="150" Height="32" Margin="4, 0, 4, 8" Grid.Column="7">
+                        <ComboBoxItem Content="Arial"/>
+                        <ComboBoxItem Content="Times New Roman"/>
+                        <ComboBoxItem Content="Verdana"/>
+                        <!-- Add more font families as needed -->
+                    </ComboBox>
+                    <!-- Label for Font Family -->
+                    <Label Content="Font Family" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </StackPanel>
-            </Border>
-
-            <Border Grid.Column="6" Style="{StaticResource FunctionalBarSectionBorder_Style}">
-                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                    <!-- TEST Button -->
-                    <Button Click="RedrawButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
-                        <Image Source="Assets/rotate-left.png"/>
-                    </Button>
-                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">TEST REDRAW</TextBlock>
-                </StackPanel>
-            </Border>
-
-            <Border x:Name="RotateShape_Border" Visibility="Hidden" Grid.Column="7" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
-                <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                    <!-- Rotate Shape -->
-                    <TextBox Text="{Binding ElementName=Angle_Slider, Path=Value, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumericConverter}}" TextAlignment="Center" Width="40" />
-                    <Slider Width="150" Margin="4, 4, 4, 2" Name="Angle_Slider"
-                            Minimum="-179" Maximum="180" Value="0"
-                            TickFrequency="1" TickPlacement="None" IsSnapToTickEnabled="True"
-                            ValueChanged="AngleSlider_ValueChanged"/>
-
-                    <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Rotate</TextBlock>
-                </StackPanel>
-            </Border>
-
+            </Grid>
         </Grid>
-
-
         <!-- ====== Main Canvas ====== -->
         <Canvas Name="Main_Canvas" Background="White" 
                 MouseDown="MainCanvas_MouseDown"

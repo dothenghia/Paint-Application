@@ -10,6 +10,8 @@ namespace MyShapes
         string Name { get; }
         string Icon { get; }
         //string Text { get; set; }
+
+        public RichTextBox richTextBox {get;set;}
         public double Thickness { get; set; }
         public double Angle { get; set; }
         public DoubleCollection StrokeDash { get; set; }
