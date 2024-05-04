@@ -61,7 +61,7 @@ namespace MyPaint
         public System.Windows.Point startPoint; // Start point of the shape
         public System.Windows.Point endPoint; // End point of the shape
         Dictionary<string, DoubleCollection> dashCollections = new Dictionary<string, DoubleCollection>(); // List of dash styles
-
+        int count = 0;
         private Stack<IShape> forwardBuffer = new Stack<IShape>();// Danh sách các hình vẽ được pop ra sau khi undo
 
         List<IShape> prototypeShapes = new List<IShape>(); // Danh sách các hình vẽ có thể chọn từ giao diện (Sản phẩm mẫu)
@@ -78,13 +78,23 @@ namespace MyPaint
             select,
             text
         };
+        enum actionType
+        {
+            delete,
+            create,
+            update,
+            clear
+        }
+        List<int> positionTurns = new List<int> ();
+        Stack<int> positionTurnBuffer = new Stack<int>();
 
         bool isDrawing = false; // Is Drawing - Used to remove the last shape (preview shape) when drawing
         bool isDrawn = false; // Is Drawn - Used to check if the shape is drawn or not (handle MouseUp event is triggered)
-
+        bool isClicked = true;
         int selectingIndex = -1; // Index of the selecting single shape
         bool isSelecting = false; // Is Selecting - Used to check if the shape is selecting or not (avoid drawing new shape when selecting shape)
         System.Windows.Point dragStartPoint; // Start point when dragging the shape
+        System.Windows.Point previousLocation;
         SolidColorBrush textColor;
         SolidColorBrush backgroundColor;
         RevisionControl revisionControl = new RevisionControl();
@@ -178,8 +188,8 @@ namespace MyPaint
         {
             if(selectingIndex > -1)
             {
-                CutCommand cut = new CutCommand(clipboard, drawnShapes, drawnShapes[selectingIndex], memory, true);
-                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer));
+                CutCommand cut = new CutCommand(clipboard, drawnShapes, drawnShapes[selectingIndex], memory, forwardBuffer, positionTurns, positionTurnBuffer, true);
+                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer, positionTurns, positionTurnBuffer, count));
                 toolBarCommand.Toolbar_Copy();
             }
         }
@@ -188,8 +198,9 @@ namespace MyPaint
         {
             if (selectingIndex > -1)
             {
-                CutCommand cut = new CutCommand(clipboard, drawnShapes, drawnShapes[selectingIndex], memory, false);
-                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer));
+                CutCommand cut = new CutCommand(clipboard, drawnShapes, drawnShapes[selectingIndex], memory, forwardBuffer, positionTurns, positionTurnBuffer, false);
+                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer, positionTurns, positionTurnBuffer, count));
+
                 toolBarCommand.Toolbar_Cut();
                 RedrawCanvas();
             }
@@ -198,8 +209,9 @@ namespace MyPaint
         private void PasteButton_Click(object sender, RoutedEventArgs e)
         {
             CutCommand cut = new CutCommand(clipboard, drawnShapes, memory, true);
-            ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer));
+            ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer, positionTurns, positionTurnBuffer, count));
             toolBarCommand.Toolbar_Paste();
+            positionTurns.Add(drawnShapes.Count - 1);
             RedrawCanvas();
         }
 
@@ -533,14 +545,14 @@ namespace MyPaint
         }
         private void UndoButton_Click(object sender, RoutedEventArgs e)
         {
-            Command control = new UndoCommand(revisionControl, drawnShapes, forwardBuffer);
+            Command control = new UndoCommand(revisionControl, drawnShapes, forwardBuffer, positionTurns, positionTurnBuffer, count);
             ToolBarCommand toolBarCommand = new ToolBarCommand(control);
             toolBarCommand.Toolbar_Undo();
             RedrawCanvas();
         }
         private void RedoButton_Click(object sender, RoutedEventArgs e)
         {
-            Command control = new UndoCommand(revisionControl, drawnShapes, forwardBuffer);
+            Command control = new UndoCommand(revisionControl, drawnShapes, forwardBuffer, positionTurns, positionTurnBuffer, count);
             ToolBarCommand toolBarCommand = new ToolBarCommand(control);
             toolBarCommand.Toolbar_Redo();
             RedrawCanvas();
@@ -549,7 +561,6 @@ namespace MyPaint
         private void RedrawCanvas()
         {
             Main_Canvas.Children.Clear();
-            Console.WriteLine(drawnShapes.Count);
             foreach (var shape in drawnShapes)
             {
                 Canvas shapeCanvas = shape.Convert();
@@ -688,15 +699,13 @@ namespace MyPaint
                             BorderThickness = new Thickness(0), // Remove the border of the RichTextBox
                             HorizontalAlignment = HorizontalAlignment.Center, // Center the RichTextBox horizontally
                             VerticalAlignment = VerticalAlignment.Center, // Center the RichTextBox vertically
+                            FontFamily = new FontFamily("Arial"),
+                            FontSize = 12.0,
                         };
 
                         // Create a new paragraph and add it to the RichTextBox
                         Paragraph paragraph = new Paragraph();
                         richTextBox.Document.Blocks.Add(paragraph);
-
-                        // Set the default font family and size
-                        richTextBox.Selection.ApplyPropertyValue(TextElement.FontFamilyProperty, new FontFamily("Arial"));
-                        richTextBox.Selection.ApplyPropertyValue(TextElement.FontSizeProperty, 12.0);
                         richTextBox.Padding = new Thickness(0, 0, 0, 0);
                         // Set the text
                         string text = "Sample";
@@ -709,6 +718,10 @@ namespace MyPaint
                         paragraph.TextAlignment = TextAlignment.Center;
 
                         drawnShapes[selectingIndex].richTextBox = richTextBox;
+                        drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                        drawnShapes[selectingIndex].ClearBufferData();
+                        forwardBuffer.Clear();
+                        positionTurns.Add(selectingIndex);
                         RedrawCanvas();
                     }
                     textBlock.Text = "Exit Mode";
@@ -722,7 +735,7 @@ namespace MyPaint
                 {
                     stackPanel.Visibility = Visibility.Hidden;
                 }
-                choice = "";
+                choice = myMode.draw.ToString();
             }
             
         }
@@ -744,6 +757,11 @@ namespace MyPaint
                 if (drawnShapes[selectingIndex].richTextBox != null)
                 {
                     drawnShapes[selectingIndex].richTextBox.Foreground = textColor;
+
+                    drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                    drawnShapes[selectingIndex].ClearBufferData();
+                    forwardBuffer.Clear();
+                    positionTurns.Add(selectingIndex);
                     RedrawCanvas();
                 }
             }
@@ -756,7 +774,7 @@ namespace MyPaint
             {
                 if (drawnShapes[selectingIndex].richTextBox != null)
                 {
-                    foreach(var child in drawnShapes[selectingIndex].richTextBox.Document.Blocks)
+                    foreach (var child in drawnShapes[selectingIndex].richTextBox.Document.Blocks)
                     {
                         if(child is Paragraph)
                         {
@@ -765,6 +783,11 @@ namespace MyPaint
                             textRange.ApplyPropertyValue(TextElement.BackgroundProperty, backgroundColor);
                         }
                     }
+
+                    drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                    drawnShapes[selectingIndex].ClearBufferData();
+                    forwardBuffer.Clear();
+                    positionTurns.Add(selectingIndex);
                     RedrawCanvas();
                 }
             }
@@ -778,6 +801,10 @@ namespace MyPaint
             if(selectingIndex > -1)
             {
                 drawnShapes[selectingIndex].Brush = color;
+                drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                drawnShapes[selectingIndex].ClearBufferData();
+                forwardBuffer.Clear();
+                positionTurns.Add(selectingIndex);
                 RedrawCanvas();
             }
         }
@@ -789,6 +816,10 @@ namespace MyPaint
             if (selectingIndex > -1)
             {
                 drawnShapes[selectingIndex].fillColor = color;
+                drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                drawnShapes[selectingIndex].ClearBufferData();
+                forwardBuffer.Clear();
+                positionTurns.Add(selectingIndex);
                 RedrawCanvas();
             }
         }
@@ -801,6 +832,10 @@ namespace MyPaint
             if (selectingIndex > -1)
             {
                 drawnShapes[selectingIndex].Thickness = e.NewValue;
+                drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                drawnShapes[selectingIndex].ClearBufferData();
+                forwardBuffer.Clear();
+                positionTurns.Add(selectingIndex);
                 RedrawCanvas();
             }
         }
@@ -819,6 +854,10 @@ namespace MyPaint
             if (selectingIndex > -1)
             {
                 drawnShapes[selectingIndex].StrokeDash = dashCollections[selectedTag];
+                drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                drawnShapes[selectingIndex].ClearBufferData();
+                forwardBuffer.Clear();
+                positionTurns.Add(selectingIndex);
                 RedrawCanvas();
             }
         }
@@ -858,6 +897,10 @@ namespace MyPaint
                 selectingCanvas.RenderTransform = rotateTransform;
 
                 drawnShapes[selectingIndex].Angle = angle;
+                drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                drawnShapes[selectingIndex].ClearBufferData();
+                forwardBuffer.Clear();
+                positionTurns.Add(selectingIndex);
             }
         }
 
@@ -930,7 +973,7 @@ namespace MyPaint
                     currentShape.Thickness = 3;
                     currentShape.fillColor = new SolidColorBrush(Colors.Transparent);
                 }
-                else if (choice == myMode.draw.ToString())
+                else if (choice == myMode.draw.ToString() || choice == myMode.text.ToString())
                 {
                     isDrawing = true;
                 }
@@ -941,6 +984,7 @@ namespace MyPaint
         {
             if (isDrawing == true && isDrawn == false)
             {
+                positionTurns.Add(count++);
                 isDrawn = true;
             }
         }
@@ -957,6 +1001,7 @@ namespace MyPaint
                 selectingIndex = Main_Canvas.Children.IndexOf(shapeCanvas);
 
                 dragStartPoint = e.GetPosition(Main_Canvas);
+                isClicked = true;
 
                 if(drawnShapes[selectingIndex].richTextBox != null)
                 {
@@ -983,6 +1028,11 @@ namespace MyPaint
                 Canvas.SetLeft(shapeCanvas, Canvas.GetLeft(shapeCanvas) + offsetX);
                 Canvas.SetTop(shapeCanvas, Canvas.GetTop(shapeCanvas) + offsetY);
 
+                if(offsetX > 0)
+                {
+                    isClicked = false;
+                }
+
                 // Update the start and end points of the shape
                 dragStartPoint = currentPoint;
             }
@@ -996,12 +1046,20 @@ namespace MyPaint
                 {
                     drawnShapes[selectingIndex].startPoint = new System.Windows.Point(Canvas.GetLeft(shapeCanvas), Canvas.GetTop(shapeCanvas));
                     drawnShapes[selectingIndex].endPoint = new System.Windows.Point(Canvas.GetLeft(shapeCanvas) + shapeCanvas.ActualWidth, Canvas.GetTop(shapeCanvas) + shapeCanvas.ActualHeight);
+
+                    if(isClicked == false)
+                    {
+                        drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                        drawnShapes[selectingIndex].ClearBufferData();
+                        forwardBuffer.Clear();
+                        positionTurns.Add(selectingIndex);
+                    }
                 }
             }
             // For Line, Rectangle because they are hit the cursor => Do not catch the MainCanvas_MouseUp event
             else if (isDrawing == true && isDrawn == false)
             {
-                IShape clone = (IShape)currentShape.Clone();
+                positionTurns.Add(count++);
                 isDrawn = true;
             }
         }
@@ -1054,11 +1112,14 @@ namespace MyPaint
                     string fontSize = selectedItem.Content.ToString();
                     double selectedFontSize = Convert.ToDouble(fontSize);
                     drawnShapes[selectingIndex].richTextBox.FontSize = selectedFontSize;
+                    drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                    drawnShapes[selectingIndex].ClearBufferData();
+                    forwardBuffer.Clear();
+                    positionTurns.Add(selectingIndex);
                     RedrawCanvas();
                 }
             }
         }
-
         private void FontComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (selectingIndex > -1)
@@ -1070,6 +1131,10 @@ namespace MyPaint
                 {
                     string font = selectedItem.Content.ToString();
                     drawnShapes[selectingIndex].richTextBox.FontFamily = new FontFamily(font);
+                    drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                    drawnShapes[selectingIndex].ClearBufferData();
+                    forwardBuffer.Clear();
+                    positionTurns.Add(selectingIndex);
                     RedrawCanvas();
                 }
             }

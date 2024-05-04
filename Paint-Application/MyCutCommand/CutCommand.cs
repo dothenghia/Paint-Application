@@ -11,12 +11,19 @@ namespace MyCutCommand
         private readonly List<IShape> drawnShapes;
         private readonly IShape selectedShape;
         private readonly List<IShape> memory;
+        private readonly Stack<IShape> buffer;
         private readonly bool selection;
-        public CutCommand(ClipboardControl clipboardControl, List<IShape> drawnShapes, IShape selectedShape, List<IShape> memory, bool selection) {
+        private readonly List<int> postion;
+        private readonly Stack<int> positionBuffer;
+
+        public CutCommand(ClipboardControl clipboardControl, List<IShape> drawnShapes, IShape selectedShape, List<IShape> memory, Stack<IShape> buffer, List<int> postion, Stack<int> positionBuffer, bool selection) {
             this.clipboardControl = clipboardControl;
             this.drawnShapes = drawnShapes;
             this.selectedShape = selectedShape;
             this.memory = memory;
+            this.buffer = buffer;
+            this.positionBuffer = positionBuffer;
+            this.postion = postion;
             this.selection = selection;
         }
 
@@ -32,7 +39,7 @@ namespace MyCutCommand
         {
             if(selection == false)
             {
-                clipboardControl.Cut(drawnShapes, selectedShape, memory);
+                clipboardControl.Cut(drawnShapes, selectedShape, memory, buffer, postion, positionBuffer);
             }
             else
             {
