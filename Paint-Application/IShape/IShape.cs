@@ -15,6 +15,8 @@ namespace MyShapes
         public RichTextBox richTextBox {get;set;}
         public double Thickness { get; set; }
         public double Angle { get; set; }
+        public double ScaleH { get; set; }
+        public double ScaleV { get; set; }
         public DoubleCollection StrokeDash { get; set; }
         public SolidColorBrush Brush { get; set; }
         public Point startPoint { get; set; }
@@ -27,6 +29,8 @@ namespace MyShapes
             public SolidColorBrush fillColor_clone { get; set; } = Brushes.Transparent; // Fil color
             public double Thickness_clone { get; set; } = 3;
             public double Angle_clone { get; set; } = 0;
+            public double ScaleH_clone { get; set; } = 0;
+            public double ScaleV_clone { get; set; } = 0;
             public DoubleCollection StrokeDash_clone { get; set; } = new DoubleCollection();
             public SolidColorBrush Brush_clone { get; set; } = Brushes.Black;
             public Point startPoint_clone { get; set; }

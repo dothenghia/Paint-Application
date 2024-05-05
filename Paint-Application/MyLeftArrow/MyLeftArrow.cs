@@ -16,6 +16,8 @@ namespace LeftArrow
         public RichTextBox richTextBox { get; set; }
         public double Thickness { get; set; } = 3;
         public double Angle { get; set; } = 0;
+        public double ScaleH { get; set; } = 1;
+        public double ScaleV { get; set; } = 1;
         public DoubleCollection StrokeDash { get; set; } = new DoubleCollection();
         public SolidColorBrush Brush { get; set; } = Brushes.Black;
         public Point startPoint { get; set; }
@@ -152,9 +154,15 @@ namespace LeftArrow
                 frameCanvas.Children.Add(richTextBox);
             }
 
+            // Apply rotate & scale transform
             RotateTransform rotateTransform = new RotateTransform(Angle);
             frameCanvas.RenderTransformOrigin = new Point(0.5, 0.5);
-            frameCanvas.RenderTransform = rotateTransform;
+            ScaleTransform scaleTransform = new ScaleTransform(ScaleH, ScaleV);
+            TransformGroup transformGroup = new TransformGroup();
+            transformGroup.Children.Add(rotateTransform); // Add rotate transform first
+            transformGroup.Children.Add(scaleTransform); // Add scale transform
+            frameCanvas.RenderTransform = transformGroup;
+            
             return frameCanvas;
         }
         public List<IShape.Action> actionHistory { get; set; }
@@ -166,6 +174,8 @@ namespace LeftArrow
                 fillColor_clone = fillColor,
                 Thickness_clone = Thickness,
                 Angle_clone = Angle,
+                ScaleH_clone = ScaleH,
+                ScaleV_clone = ScaleV,
                 StrokeDash_clone = StrokeDash,
                 Brush_clone = Brush,
                 startPoint_clone = startPoint,
@@ -255,6 +265,8 @@ namespace LeftArrow
             fillColor = shapeState.fillColor_clone;
             Thickness = shapeState.Thickness_clone;
             Angle = shapeState.Angle_clone;
+            ScaleH = shapeState.ScaleH_clone;
+            ScaleV = shapeState.ScaleV_clone;
             StrokeDash = shapeState.StrokeDash_clone;
             Brush = shapeState.Brush_clone;
             startPoint = shapeState.startPoint_clone;

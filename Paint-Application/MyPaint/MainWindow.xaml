@@ -208,49 +208,44 @@
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Column="6" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
+                <Border x:Name="TransformShape_Border" Visibility="Hidden" Grid.Column="6" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
                     <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                        <!-- Layers Button -->
-                        <Button Click="LayersButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
-                            <Image Source="Assets/layer.png"/>
-                        </Button>
-                        <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Layers</TextBlock>
-                    </StackPanel>
-                </Border>
+                        <StackPanel Orientation="Horizontal">
+                            <!-- Rotate Shape -->
+                            <StackPanel>
+                                <TextBox Text="{Binding ElementName=Angle_Slider, Path=Value, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumericConverter}}" TextAlignment="Center" Width="40" />
+                                <Slider Width="150" Margin="4, 4, 4, 2" Name="Angle_Slider"
+                                        Minimum="-179" Maximum="180" Value="0"
+                                        TickFrequency="1" TickPlacement="None" IsSnapToTickEnabled="True"
+                                        ValueChanged="AngleSlider_ValueChanged"/>
+                                <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Rotate</TextBlock>
+                            </StackPanel>
 
-                <Border Grid.Column="7" Style="{StaticResource FunctionalBarSectionBorder_Style}">
-                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                        <!-- Clean Button -->
-                        <Button Click="CleanButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
-                            <Image Source="Assets/clean.png"/>
-                        </Button>
-                        <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Clean</TextBlock>
-                    </StackPanel>
-                </Border>
+                            <!-- Transform X Shape -->
+                            <StackPanel>
+                                <TextBox Text="{Binding ElementName=ScaleX_Slider, Path=Value, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumericConverter}}" TextAlignment="Center" Width="40" />
+                                <Slider Width="100" Margin="4, 4, 4, 2" Name="ScaleX_Slider"
+                                        Minimum="0.5" Maximum="2" Value="1"
+                                        TickFrequency="0.1" TickPlacement="None" IsSnapToTickEnabled="True"
+                                        ValueChanged="ScaleXSlider_ValueChanged"/>
+                                <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Scale X</TextBlock>
+                            </StackPanel>
 
-                <!--<Border Grid.Column="6" Style="{StaticResource FunctionalBarSectionBorder_Style}">
-                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                        --><!-- TEST Button --><!--
-                        <Button Click="RedrawButton_Click" Style="{StaticResource FunctionalBarButtonImage_Style}">
-                            <Image Source="Assets/rotate-left.png"/>
-                        </Button>
-                        <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">TEST REDRAW</TextBlock>
-                    </StackPanel>
-                </Border>-->
+                            <!-- Transform Y Shape -->
+                            <StackPanel>
+                                <TextBox Text="{Binding ElementName=ScaleY_Slider, Path=Value, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumericConverter}}" TextAlignment="Center" Width="40" />
+                                <Slider Width="100" Margin="4, 4, 4, 2" Name="ScaleY_Slider"
+                                        Minimum="0.5" Maximum="2" Value="1"
+                                        TickFrequency="0.1" TickPlacement="None" IsSnapToTickEnabled="True"
+                                        ValueChanged="ScaleYSlider_ValueChanged"/>
+                                <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Scale Y</TextBlock>
+                            </StackPanel>
 
-                <Border x:Name="RotateShape_Border" Visibility="Hidden" Grid.Column="8" Style="{StaticResource FunctionalBarSectionBorder_Style}" BorderThickness="0">
-                    <StackPanel Style="{StaticResource FunctionalBarSection_Style}">
-                        <!-- Rotate Shape -->
-                        <TextBox Text="{Binding ElementName=Angle_Slider, Path=Value, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NumericConverter}}" TextAlignment="Center" Width="40" />
-                        <Slider Width="150" Margin="4, 4, 4, 2" Name="Angle_Slider"
-                Minimum="-179" Maximum="180" Value="0"
-                TickFrequency="1" TickPlacement="None" IsSnapToTickEnabled="True"
-                ValueChanged="AngleSlider_ValueChanged"/>
-
-                        <TextBlock Style="{StaticResource FunctionalBarSectionTitle_Style}">Rotate</TextBlock>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </Grid>
+
             <Grid Grid.Row="1" Name="TextToolbar" Visibility="Hidden">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>

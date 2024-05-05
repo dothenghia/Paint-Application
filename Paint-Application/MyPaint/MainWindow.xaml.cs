@@ -267,8 +267,10 @@ namespace MyPaint
             writer.Write(shape.endPoint.Y);
 
             writer.Write(shape.Angle);
+            writer.Write(shape.ScaleH);
+            writer.Write(shape.ScaleV);
 
-            if(shape.richTextBox != null)
+            if (shape.richTextBox != null)
             {
                 writer.Write(true);
 
@@ -363,6 +365,8 @@ namespace MyPaint
                             System.Windows.Point startPoint = new System.Windows.Point(reader.ReadDouble(), reader.ReadDouble());
                             System.Windows.Point endPoint = new System.Windows.Point(reader.ReadDouble(), reader.ReadDouble());
                             double angle = reader.ReadDouble();
+                            double scaleH = reader.ReadDouble();
+                            double scaleV = reader.ReadDouble();
 
                             // Read RichTextBox data if available
                             System.Windows.Controls.RichTextBox richTextBox = null;
@@ -380,6 +384,8 @@ namespace MyPaint
                                     myDownArrow.fillColor = background;
                                     myDownArrow.StrokeDash = strokeDash;
                                     myDownArrow.Angle = angle;
+                                    myDownArrow.ScaleH = scaleH;
+                                    myDownArrow.ScaleV = scaleV;
                                     shape = (IShape)myDownArrow;
                                     break;
                                 case "Ellipse":
@@ -391,6 +397,8 @@ namespace MyPaint
                                     myEllipse.fillColor = background;
                                     myEllipse.StrokeDash = strokeDash;
                                     myEllipse.Angle = angle;
+                                    myEllipse.ScaleH = scaleH;
+                                    myEllipse.ScaleV = scaleV;
                                     shape = (IShape)myEllipse;
                                     break;
                                 case "LeftArrow":
@@ -402,6 +410,8 @@ namespace MyPaint
                                     myLeftArrow.StrokeDash = strokeDash;
                                     myLeftArrow.fillColor = background;
                                     myLeftArrow.Angle = angle;
+                                    myLeftArrow.ScaleH = scaleH;
+                                    myLeftArrow.ScaleV = scaleV;
                                     shape = (IShape)myLeftArrow;
                                     break;
                                 case "Line":
@@ -413,6 +423,8 @@ namespace MyPaint
                                     myLine.StrokeDash = strokeDash;
                                     myLine.fillColor = background;
                                     myLine.Angle = angle;
+                                    myLine.ScaleH = scaleH;
+                                    myLine.ScaleV = scaleV;
                                     shape = (IShape)myLine;
                                     break;
                                 case "Rectangle":
@@ -424,6 +436,8 @@ namespace MyPaint
                                     myRectangle.StrokeDash = strokeDash;
                                     myRectangle.fillColor = background;
                                     myRectangle.Angle = angle;
+                                    myRectangle.ScaleH = scaleH;
+                                    myRectangle.ScaleV = scaleV;
                                     shape = (IShape)myRectangle;
                                     break;
                                 case "RightArrow":
@@ -435,6 +449,8 @@ namespace MyPaint
                                     myRightArrow.StrokeDash = strokeDash;
                                     myRightArrow.fillColor = background;
                                     myRightArrow.Angle = angle;
+                                    myRightArrow.ScaleH = scaleH;
+                                    myRightArrow.ScaleV = scaleV;
                                     shape = (IShape)myRightArrow;
                                     break;
                                 case "Star":
@@ -446,6 +462,8 @@ namespace MyPaint
                                     myStar.StrokeDash = strokeDash;
                                     myStar.fillColor = background;
                                     myStar.Angle = angle;
+                                    myStar.ScaleH = scaleH;
+                                    myStar.ScaleV = scaleV;
                                     shape = (IShape)myStar;
                                     break;
                                 case "Triangle":
@@ -457,6 +475,8 @@ namespace MyPaint
                                     myTriangle.StrokeDash = strokeDash;
                                     myTriangle.fillColor = background;
                                     myTriangle.Angle = angle;
+                                    myTriangle.ScaleH = scaleH;
+                                    myTriangle.ScaleV = scaleV;
                                     shape = (IShape)myTriangle;
                                     break;
                                 case "UpArrow":
@@ -468,6 +488,8 @@ namespace MyPaint
                                     myUpArrow.StrokeDash = strokeDash;
                                     myUpArrow.fillColor = background;
                                     myUpArrow.Angle = angle;
+                                    myUpArrow.ScaleH = scaleH;
+                                    myUpArrow.ScaleV = scaleV;
                                     shape = (IShape)myUpArrow;
                                     drawnShapes.Add(shape);
                                     break;
@@ -893,8 +915,12 @@ namespace MyPaint
 
                 RotateTransform rotateTransform = new RotateTransform(angle);
                 selectingCanvas.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
+                ScaleTransform scaleTransform = new ScaleTransform(drawnShapes[selectingIndex].ScaleH, drawnShapes[selectingIndex].ScaleV);
+                TransformGroup transformGroup = new TransformGroup();
+                transformGroup.Children.Add(rotateTransform); // Add rotate transform first
+                transformGroup.Children.Add(scaleTransform); // Add scale transform
 
-                selectingCanvas.RenderTransform = rotateTransform;
+                selectingCanvas.RenderTransform = transformGroup;
 
                 drawnShapes[selectingIndex].Angle = angle;
                 drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
@@ -904,9 +930,57 @@ namespace MyPaint
             }
         }
 
+        private void ScaleXSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (selectingIndex != -1)
+            {
+                double scaleX = ScaleX_Slider.Value;
+                Canvas selectingCanvas = (Canvas)Main_Canvas.Children[selectingIndex];
+
+                RotateTransform rotateTransform = new RotateTransform(drawnShapes[selectingIndex].Angle);
+                selectingCanvas.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
+                ScaleTransform scaleTransform = new ScaleTransform(scaleX, drawnShapes[selectingIndex].ScaleV);
+                TransformGroup transformGroup = new TransformGroup();
+                transformGroup.Children.Add(rotateTransform); // Add rotate transform first
+                transformGroup.Children.Add(scaleTransform); // Add scale transform
+
+                selectingCanvas.RenderTransform = transformGroup;
+
+                drawnShapes[selectingIndex].ScaleH = scaleX;
+                drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                drawnShapes[selectingIndex].ClearBufferData();
+                forwardBuffer.Clear();
+                positionTurns.Add(selectingIndex);
+            }
+        }
+
+        private void ScaleYSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (selectingIndex != -1)
+            {
+                double scaleY = ScaleY_Slider.Value;
+                Canvas selectingCanvas = (Canvas)Main_Canvas.Children[selectingIndex];
+
+                RotateTransform rotateTransform = new RotateTransform(drawnShapes[selectingIndex].Angle);
+                selectingCanvas.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
+                ScaleTransform scaleTransform = new ScaleTransform(drawnShapes[selectingIndex].ScaleH, scaleY);
+                TransformGroup transformGroup = new TransformGroup();
+                transformGroup.Children.Add(rotateTransform); // Add rotate transform first
+                transformGroup.Children.Add(scaleTransform); // Add scale transform
+
+                selectingCanvas.RenderTransform = transformGroup;
+
+                drawnShapes[selectingIndex].ScaleV = scaleY;
+                drawnShapes[selectingIndex].CaptureState(IShape.ActionType.Modify);
+                drawnShapes[selectingIndex].ClearBufferData();
+                forwardBuffer.Clear();
+                positionTurns.Add(selectingIndex);
+            }
+        }
+
 
         // ==================== Main Canvas Handlers ====================
-        
+
         // MainCanvas_PreviewMouseDown will be triggered before ShapeCanvas_PreviewMouseDown
         // Used to remove the selecting shape when clicking outside the shape
         private void MainCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -915,7 +989,7 @@ namespace MyPaint
             Main_Canvas.Focus();
             RemoveSelectingShape();
             selectingIndex = -1;
-            RotateShape_Border.Visibility = Visibility.Hidden;
+            TransformShape_Border.Visibility = Visibility.Hidden;
         }
 
         private void MainCanvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -1009,8 +1083,10 @@ namespace MyPaint
                 }
                 
 
-                RotateShape_Border.Visibility = Visibility.Visible;
+                TransformShape_Border.Visibility = Visibility.Visible;
                 Angle_Slider.Value = drawnShapes[selectingIndex].Angle;
+                ScaleX_Slider.Value = drawnShapes[selectingIndex].ScaleH;
+                ScaleY_Slider.Value = drawnShapes[selectingIndex].ScaleV;
             }
         }
 
