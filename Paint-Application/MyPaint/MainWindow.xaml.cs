@@ -189,7 +189,7 @@ namespace MyPaint
             if(selectingIndex > -1)
             {
                 CutCommand cut = new CutCommand(clipboard, drawnShapes, drawnShapes[selectingIndex], memory, forwardBuffer, positionTurns, positionTurnBuffer, true);
-                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer, positionTurns, positionTurnBuffer, count));
+                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer, memory, positionTurns, positionTurnBuffer, count));
                 toolBarCommand.Toolbar_Copy();
             }
         }
@@ -199,8 +199,7 @@ namespace MyPaint
             if (selectingIndex > -1)
             {
                 CutCommand cut = new CutCommand(clipboard, drawnShapes, drawnShapes[selectingIndex], memory, forwardBuffer, positionTurns, positionTurnBuffer, false);
-                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer, positionTurns, positionTurnBuffer, count));
-
+                ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer, memory, positionTurns, positionTurnBuffer, count));
                 toolBarCommand.Toolbar_Cut();
                 RedrawCanvas();
             }
@@ -209,7 +208,7 @@ namespace MyPaint
         private void PasteButton_Click(object sender, RoutedEventArgs e)
         {
             CutCommand cut = new CutCommand(clipboard, drawnShapes, memory, true);
-            ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer, positionTurns, positionTurnBuffer, count));
+            ToolBarCommand toolBarCommand = new ToolBarCommand(cut, new UndoCommand(revisionControl, drawnShapes, forwardBuffer, memory, positionTurns, positionTurnBuffer, count));
             toolBarCommand.Toolbar_Paste();
             positionTurns.Add(drawnShapes.Count - 1);
             RedrawCanvas();
@@ -567,14 +566,14 @@ namespace MyPaint
         }
         private void UndoButton_Click(object sender, RoutedEventArgs e)
         {
-            Command control = new UndoCommand(revisionControl, drawnShapes, forwardBuffer, positionTurns, positionTurnBuffer, count);
+            Command control = new UndoCommand(revisionControl, drawnShapes, forwardBuffer, memory, positionTurns, positionTurnBuffer, count);
             ToolBarCommand toolBarCommand = new ToolBarCommand(control);
             toolBarCommand.Toolbar_Undo();
             RedrawCanvas();
         }
         private void RedoButton_Click(object sender, RoutedEventArgs e)
         {
-            Command control = new UndoCommand(revisionControl, drawnShapes, forwardBuffer, positionTurns, positionTurnBuffer, count);
+            Command control = new UndoCommand(revisionControl, drawnShapes, forwardBuffer, memory, positionTurns, positionTurnBuffer, count);
             ToolBarCommand toolBarCommand = new ToolBarCommand(control);
             toolBarCommand.Toolbar_Redo();
             RedrawCanvas();

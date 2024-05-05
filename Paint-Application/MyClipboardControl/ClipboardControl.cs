@@ -22,13 +22,32 @@ namespace MyClipboardControl
                     if (position[i] > index)
                     {
                         position[i] -= 1;
-                    } else if (position[i] == index)
+                    }
+                    else if (position[i] == index)
                     {
-                        position[i] = drawnShapes.Count - 1;
+                        position[i] = position.Max();
+                        positionBuffer.Push(position.Max());
+                        position.RemoveAt(position.Count - 1);
+                        drawnShapes.RemoveAt(index);
+                        return;
                     }
                 }
-                position.Add(drawnShapes.Count - 1);
+
+                position.RemoveAt(position.Count - 1);
+                positionBuffer.Push(drawnShapes.Count - 1);
                 drawnShapes.RemoveAt(index);
+                //for (int i = 0; i < position.Count; i++)
+                //{
+                //    if (position[i] > index)
+                //    {
+                //        position[i] -= 1;
+                //    } else if (position[i] == index)
+                //    {
+                //        position[i] = drawnShapes.Count - 1;
+                //    }
+                //}
+                //position.Add(drawnShapes.Count - 1);
+                //drawnShapes.RemoveAt(index);
             }
         }
 

@@ -1,11 +1,12 @@
 using MyShapes;
 using System;
+using System.Reflection;
 
 namespace MyRevisionControl
 {
     public class RevisionControl
     {
-        public void Undo(List<IShape>drawnShapes, Stack<IShape> buffer, List<int> position, Stack<int> positionBuffer)
+        public void Undo(List<IShape>drawnShapes, Stack<IShape> buffer, List<IShape> memory, List<int> position, Stack<int> positionBuffer)
         {
             if (drawnShapes.Count == 0 && buffer.Count == 0)
                 return;
@@ -15,6 +16,7 @@ namespace MyRevisionControl
                 {
                     buffer.Push(drawnShapes[position[position.Count - 1]]);
                     drawnShapes.RemoveAt(position[position.Count - 1]);
+
                     for(int i = 0; i < position.Count; i++)
                     {
                         if(position[i] > position[position.Count - 1])
@@ -22,12 +24,31 @@ namespace MyRevisionControl
                             position[i] -= 1;
                         } else if(position[i] == position[position.Count - 1])
                         {
-                            position[i] = drawnShapes.Count - 1;
+                            position[i] = position.Max();
+                            positionBuffer.Push(position.Max());
+                            position.RemoveAt(position.Count - 1);
+                            return;
                         }
                     }
+                    position.RemoveAt(position.Count - 1);
+                    positionBuffer.Push(drawnShapes.Count - 1);
+                } else
+                {
+                    positionBuffer.Push(position[position.Count - 1]);
+                    position.RemoveAt(position.Count - 1);
+
                 }
-                positionBuffer.Push(position[position.Count - 1]);
-                position.RemoveAt(position.Count - 1);
+            } else if(memory.Count != 0) 
+            {
+                if (drawnShapes.Count == 0 && buffer.Count != 0 && buffer.Peek().startPoint == memory[memory.Count - 1].startPoint && buffer.Peek().endPoint == memory[memory.Count - 1].endPoint)
+                {
+                    drawnShapes.Add((IShape)buffer.Pop().Clone());
+                    drawnShapes[drawnShapes.Count - 1].CaptureState(IShape.ActionType.Create);
+                    IShape.Action getPopped = drawnShapes[drawnShapes.Count - 1].actionHistory[drawnShapes[drawnShapes.Count - 1].actionHistory.Count - 1].Clone();
+                    drawnShapes[drawnShapes.Count - 1].actionBuffer.Push(getPopped);
+                    memory.RemoveAt(memory.Count - 1);
+                    position.Add(drawnShapes.Count - 1);
+                }    
             }
         }
 
